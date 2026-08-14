@@ -1,0 +1,303 @@
+{
+  "comparison_group": "cert-c-medium-115-v1-rubric-v2-off-high",
+  "data_kind": "sanitized_benchmark_ranking",
+  "publication_allowed": true,
+  "schema_version": "medium-off-high-step37-public-ranking-v1",
+  "systems": [
+    {
+      "denominator": 115,
+      "display_name": "GPT-5.6 Luna",
+      "judge_eligible": 112,
+      "judge_verdict_counts": {
+        "fail": 10,
+        "pass": 102
+      },
+      "rank": 1,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 0,
+      "system_id": "gpt-5.6-luna-openrouter-azure-eu-high-8192-v1",
+      "validation_passed": 102,
+      "validation_passed_rate": 0.886956521739
+    },
+    {
+      "denominator": 115,
+      "display_name": "Hy3",
+      "judge_eligible": 106,
+      "judge_verdict_counts": {
+        "fail": 15,
+        "invalid_canary": 1,
+        "pass": 90
+      },
+      "rank": 2,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 0,
+      "system_id": "hy3-openrouter-deepinfra-fp8-high-16384-v1",
+      "validation_passed": 90,
+      "validation_passed_rate": 0.782608695652
+    },
+    {
+      "denominator": 115,
+      "display_name": "Gemini 3 Flash Preview",
+      "judge_eligible": 108,
+      "judge_verdict_counts": {
+        "fail": 19,
+        "pass": 88,
+        "uncertain": 1
+      },
+      "rank": 3,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 1,
+      "system_id": "gemini-3-flash-preview-openrouter-vertex-global-high-16384-v1",
+      "validation_passed": 88,
+      "validation_passed_rate": 0.765217391304
+    },
+    {
+      "denominator": 115,
+      "display_name": "DeepSeek V4 Pro",
+      "judge_eligible": 110,
+      "judge_verdict_counts": {
+        "fail": 25,
+        "pass": 85
+      },
+      "rank": 4,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 1,
+      "system_id": "deepseek-v4-pro-openrouter-coreweave-fp8-high-8192-v1",
+      "validation_passed": 85,
+      "validation_passed_rate": 0.739130434783
+    },
+    {
+      "denominator": 115,
+      "display_name": "DeepSeek V4 Flash 0731",
+      "judge_eligible": 110,
+      "judge_verdict_counts": {
+        "fail": 28,
+        "pass": 82
+      },
+      "rank": 5,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 0,
+      "system_id": "deepseek-v4-flash-0731-openrouter-coreweave-fp8-high-8192-v1",
+      "validation_passed": 82,
+      "validation_passed_rate": 0.713043478261
+    },
+    {
+      "denominator": 115,
+      "display_name": "Qwen3.6-27B",
+      "judge_eligible": 102,
+      "judge_verdict_counts": {
+        "fail": 22,
+        "pass": 80
+      },
+      "rank": 6,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 0,
+      "system_id": "qwen3.6-27b-openrouter-coreweave-fp8-high-16384-v1",
+      "validation_passed": 80,
+      "validation_passed_rate": 0.695652173913
+    },
+    {
+      "denominator": 115,
+      "display_name": "DeepSeek V4 Flash 0423",
+      "judge_eligible": 113,
+      "judge_verdict_counts": {
+        "fail": 34,
+        "pass": 79
+      },
+      "rank": 7,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 1,
+      "system_id": "deepseek-v4-flash-0423-openrouter-coreweave-fp8-high-8192-v1",
+      "validation_passed": 79,
+      "validation_passed_rate": 0.686956521739
+    },
+    {
+      "denominator": 115,
+      "display_name": "Gemini 3 Flash Preview",
+      "judge_eligible": 112,
+      "judge_verdict_counts": {
+        "fail": 31,
+        "pass": 79,
+        "uncertain": 2
+      },
+      "rank": 7,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 0,
+      "system_id": "gemini-3-flash-preview-openrouter-vertex-global-off-v1",
+      "validation_passed": 79,
+      "validation_passed_rate": 0.686956521739
+    },
+    {
+      "denominator": 115,
+      "display_name": "GPT-5.6 Luna",
+      "judge_eligible": 105,
+      "judge_verdict_counts": {
+        "fail": 28,
+        "pass": 77
+      },
+      "rank": 9,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 0,
+      "system_id": "gpt-5.6-luna-openrouter-azure-eu-off-v1",
+      "validation_passed": 77,
+      "validation_passed_rate": 0.669565217391
+    },
+    {
+      "denominator": 115,
+      "display_name": "Step 3.7 Flash",
+      "judge_eligible": 110,
+      "judge_verdict_counts": {
+        "fail": 33,
+        "pass": 77
+      },
+      "rank": 9,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 2,
+      "system_id": "step-3.7-flash-openrouter-deepinfra-unknown-high-8192-v1",
+      "validation_passed": 77,
+      "validation_passed_rate": 0.669565217391
+    },
+    {
+      "denominator": 115,
+      "display_name": "MiMo V2.5",
+      "judge_eligible": 109,
+      "judge_verdict_counts": {
+        "fail": 34,
+        "pass": 74,
+        "uncertain": 1
+      },
+      "rank": 11,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 0,
+      "system_id": "mimo-v2.5-openrouter-explicit-provider-composite-high-8192-v1",
+      "validation_passed": 74,
+      "validation_passed_rate": 0.64347826087
+    },
+    {
+      "denominator": 115,
+      "display_name": "DeepSeek V4 Pro",
+      "judge_eligible": 113,
+      "judge_verdict_counts": {
+        "fail": 39,
+        "pass": 72,
+        "uncertain": 2
+      },
+      "rank": 12,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 1,
+      "system_id": "deepseek-v4-pro-openrouter-coreweave-fp8-off-v1",
+      "validation_passed": 72,
+      "validation_passed_rate": 0.626086956522
+    },
+    {
+      "denominator": 115,
+      "display_name": "MiniMax M3",
+      "judge_eligible": 109,
+      "judge_verdict_counts": {
+        "fail": 37,
+        "pass": 72
+      },
+      "rank": 12,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 0,
+      "system_id": "minimax-m3-openrouter-venice-fp8-high-8192-v1",
+      "validation_passed": 72,
+      "validation_passed_rate": 0.626086956522
+    },
+    {
+      "denominator": 115,
+      "display_name": "DeepSeek V4 Flash 0731",
+      "judge_eligible": 109,
+      "judge_verdict_counts": {
+        "fail": 39,
+        "pass": 68,
+        "uncertain": 2
+      },
+      "rank": 14,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 4,
+      "system_id": "deepseek-v4-flash-0731-openrouter-coreweave-fp8-off-v1",
+      "validation_passed": 68,
+      "validation_passed_rate": 0.591304347826
+    },
+    {
+      "denominator": 115,
+      "display_name": "Hy3",
+      "judge_eligible": 110,
+      "judge_verdict_counts": {
+        "fail": 40,
+        "pass": 68,
+        "uncertain": 2
+      },
+      "rank": 14,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 1,
+      "system_id": "hy3-openrouter-tencent-fp8-off-v1",
+      "validation_passed": 68,
+      "validation_passed_rate": 0.591304347826
+    },
+    {
+      "denominator": 115,
+      "display_name": "Qwen3.6-27B",
+      "judge_eligible": 110,
+      "judge_verdict_counts": {
+        "fail": 40,
+        "pass": 68,
+        "uncertain": 2
+      },
+      "rank": 14,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 3,
+      "system_id": "qwen3.6-27b-openrouter-ionet-fp8-off-v1",
+      "validation_passed": 68,
+      "validation_passed_rate": 0.591304347826
+    },
+    {
+      "denominator": 115,
+      "display_name": "DeepSeek V4 Flash 0423",
+      "judge_eligible": 112,
+      "judge_verdict_counts": {
+        "fail": 46,
+        "pass": 66
+      },
+      "rank": 17,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 3,
+      "system_id": "deepseek-v4-flash-0423-openrouter-coreweave-fp8-off-v1",
+      "validation_passed": 66,
+      "validation_passed_rate": 0.573913043478
+    },
+    {
+      "denominator": 115,
+      "display_name": "MiniMax M3",
+      "judge_eligible": 104,
+      "judge_verdict_counts": {
+        "fail": 43,
+        "pass": 60,
+        "uncertain": 1
+      },
+      "rank": 18,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 1,
+      "system_id": "minimax-m3-openrouter-venice-fp8-off-v1",
+      "validation_passed": 60,
+      "validation_passed_rate": 0.521739130435
+    },
+    {
+      "denominator": 115,
+      "display_name": "MiMo-V2.5",
+      "judge_eligible": 111,
+      "judge_verdict_counts": {
+        "fail": 51,
+        "pass": 58,
+        "uncertain": 2
+      },
+      "rank": 19,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 1,
+      "system_id": "mimo-v2.5-openrouter-parasail-fp8-off-v1",
+      "validation_passed": 58,
+      "validation_passed_rate": 0.504347826087
+    }
+  ]
+}

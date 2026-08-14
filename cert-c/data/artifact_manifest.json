@@ -1,0 +1,17 @@
+{
+  "catalog_schema_version": "medium-off-high-step37-public-catalog-v1",
+  "catalog_sha256": "bbb7f6d63f2197b30870b05e1f4d03f9692e36e98e41758ec5e3a5e4385e7d93",
+  "comparison_group": "cert-c-medium-115-v1-rubric-v2-off-high",
+  "entries": 19,
+  "leakage_report_sha256": "902a0799ceab3ed8fba8a49e2b00bfc7a615354f7750515b9b8cb290b9cd45c3",
+  "manifest_schema_version": "leaderboard-public-artifact-manifest-v1",
+  "public_ranking_sha256": "2d3850c64a7c35f02b4d0aa8c27fdedef527dc078dfde24aaad245a4d4e076d9",
+  "publication_allowed": true,
+  "ranking_schema_version": "medium-off-high-step37-public-ranking-v1",
+  "reasoning_high_entries": 10,
+  "reasoning_off_entries": 9,
+  "remote_push_or_pr": false,
+  "sanitization": "passed",
+  "status": "sanitized_public_data_ready",
+  "ui_included": false
+}

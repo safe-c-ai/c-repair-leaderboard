@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How well do LLMs repair CERT-C violations, and at what cost — every system measured on the same 115 cases.">
+  <title>Repair leaderboard</title>
+  <link rel="stylesheet" href="styles.css?v=20260814-publish">
+  <script src="app.js?v=20260814-publish" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
+
+  <header class="site-header">
+    <div class="shell nav-shell">
+      <a class="brand" href="#top" id="brand-link" aria-label="Leaderboard home">
+        <span class="brand-mark" aria-hidden="true">C</span>
+        <span class="brand-text"><span id="brand-name">Repair leaderboard</span><span class="brand-sub">CERT-C</span></span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#overview">Results</a>
+        <a href="#cost">Cost vs. score</a>
+        <a href="#leaderboard">Leaderboard</a>
+        <a href="#methodology">FAQ</a>
+      </nav>
+      <span class="edition-chip" title="Leaderboard version">v0.1</span>
+      <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">CERT-C automated repair</p>
+        <h1 id="hero-title">How well do LLMs repair CERT-C violations — <em>and at what cost</em>?</h1>
+        <p class="lede">
+          Every system repairs the same 115 violation cases — one for each
+          <strong>CERT-C Rule</strong> — under identical conditions; repair quality and
+          generation cost are measured together.
+        </p>
+      </div>
+      <aside class="hero-note" aria-label="How to read this leaderboard">
+        <p class="hero-note-label">How to read this</p>
+        <p>
+          <strong>Validation-passed</strong> counts fixes that cleared all four evaluation
+          gates — format, compile, programmatic checks, and an LLM rubric judge. It is
+          <strong>not</strong> a correctness, safety, merge, or adoption guarantee.
+        </p>
+      </aside>
+    </section>
+
+    <section class="cost-section shell" id="overview" aria-labelledby="overview-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Main score</p>
+          <h2 id="overview-title">Validation-passed by rank</h2>
+        </div>
+        <div class="chart-controls">
+          <div class="chart-legend" aria-hidden="true">
+            <span class="legend-item"><span class="legend-dot legend-off"></span>Reasoning OFF</span>
+            <span class="legend-item"><span class="legend-dot legend-high"></span>Reasoning HIGH</span>
+          </div>
+          <button type="button" class="ci-toggle" id="toggle-ci" aria-pressed="false">Show 95% CI</button>
+        </div>
+      </div>
+      <article class="cost-panel">
+        <div class="chart-card">
+          <div id="rank-chart" class="chart" role="img" aria-label="Bar chart of validation-passed rate for all Reasoning OFF and HIGH systems, in rank order. Each bar is labelled with its system name and rate and colored by reasoning mode. Hover a bar for its 95% CI and cost."></div>
+          <p class="chart-hint">Each bar shows a system's validation-passed rate, colored by reasoning mode (see legend). Hover a bar for its 95% CI and generation cost.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="cost-section shell" id="cost" aria-labelledby="cost-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Decision view</p>
+          <h2 id="cost-title">Validation-passed vs. generation cost</h2>
+        </div>
+      </div>
+      <article class="cost-panel" aria-labelledby="cost-title">
+        <div class="chart-card">
+          <div id="cost-chart" class="chart" role="img" aria-label="Scatter plot of validation-passed rate against generation cost on a log scale, for all Reasoning OFF and HIGH systems. Upper-left is favorable. OFF and HIGH are shown in different colors. Frontier systems are labelled; hover any point for its exact rate, 95% CI, and cost. The key below lists every system in rank order."></div>
+          <p class="chart-hint">Upper-left is favorable. Dashed staircases trace each mode's cost-efficiency frontier; frontier systems are labelled. Hover any point for its exact rate, 95% CI, and cost; the key below lists every system in rank order.</p>
+        </div>
+        <ol id="cost-list" class="cost-list" aria-label="Systems in rank order. Hover to highlight the matching point."></ol>
+      </article>
+    </section>
+
+    <section class="board shell" id="leaderboard" aria-labelledby="board-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Full results</p>
+          <h2 id="board-title">System configurations (ranked)</h2>
+        </div>
+        <p class="result-summary" id="result-summary" aria-live="polite">Loading measured results…</p>
+      </div>
+
+      <div class="toolbar">
+        <label class="search-field">
+          <span class="sr-only">Find a system</span>
+          <input id="search" type="search" placeholder="Search model, provider, endpoint, quantization…" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="mode-filter" role="group" aria-label="Reasoning mode filter">
+          <button type="button" class="mode-chip active" data-mode="all" aria-pressed="true">All</button>
+          <button type="button" class="mode-chip" data-mode="off" aria-pressed="false">OFF</button>
+          <button type="button" class="mode-chip" data-mode="high" aria-pressed="false">HIGH</button>
+        </div>
+        <p class="toolbar-note" id="sort-note" aria-live="polite">Sorted by rank</p>
+      </div>
+
+      <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
+        <table id="board-table">
+          <caption class="sr-only">v0.1 Reasoning OFF and HIGH repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="col-rank">
+                <button class="sort-btn" data-sort="rank" aria-label="Sort by rank">Rank <span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+              <th scope="col" class="col-system">
+                <button class="sort-btn" data-sort="name" aria-label="Sort by system name">System <span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+              <th scope="col" class="col-metric priority-validation">
+                <button class="sort-btn active" data-sort="validation" aria-label="Sort by validation-passed">Validation-passed <span class="sort-ind" aria-hidden="true">▼</span></button>
+              </th>
+              <th scope="col" class="col-metric optional-compile">
+                <button class="sort-btn" data-sort="compile" aria-label="Sort by compile-pass">Compile <span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+              <th scope="col" class="col-metric optional-logic">
+                <button class="sort-btn" data-sort="logic" aria-label="Sort by suspicious logic deletion, lower is better">Susp. logic deletion <span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+              <th scope="col" class="col-cost priority-cost">
+                <button class="sort-btn" data-sort="cost" aria-label="Sort by generation cost">Gen. cost <span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+              <th scope="col" class="col-cost optional-cost-pass">
+                <button class="sort-btn" data-sort="costPerPass" aria-label="Sort by cost per validation-passed fix">Cost / passed <span class="sort-ind" aria-hidden="true"></span></button>
+              </th>
+              <th scope="col" class="col-reason optional-reason">Reasoning</th>
+              <th scope="col" class="col-action"><span class="sr-only">Details</span></th>
+            </tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+        <div class="state-panel" id="board-state" hidden></div>
+      </div>
+
+      <div class="metric-notes">
+        <p><strong>Rank is descriptive.</strong> Many adjacent 95% Wilson confidence intervals overlap; only exact count ties share a rank.</p>
+        <p><strong>Validation-passed</strong> denominator is all 115 cases.</p>
+        <p><strong>Compile</strong> is a programmatic gate; passing it reduces risk but does not prove semantic correctness.</p>
+        <p><strong>Suspicious logic deletion</strong> counts fixes the Judge flagged as likely deleting important, violation-unrelated logic; lower is better. The denominator is Judge-evaluated candidates. It is shown without a risk color because no calibrated display threshold has been adopted.</p>
+        <p><strong>Cost</strong> is measured generation cost for this run only; it excludes Judge and operator cost. Counts and denominators are always shown.</p>
+      </div>
+    </section>
+
+    <section class="methodology shell" id="methodology" aria-labelledby="method-title">
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">FAQ</p>
+          <h2 id="method-title">Frequently asked questions</h2>
+        </div>
+      </div>
+
+      <div class="method-grid faq-grid">
+        <details class="method-card">
+          <summary><span role="heading" aria-level="3">Why does this leaderboard exist?</span></summary>
+          <p>To help you choose, from measurements, which model and which settings to use for automated CERT-C violation repair. The board compares repair performance and generation cost across configurations on the same evaluation pack. The base models were selected from widely used models on <a href="https://openrouter.ai/rankings" rel="noreferrer">OpenRouter's public rankings</a>, prioritizing strong performance at low cost, with Qwen3.6-27B — this project's baseline — as the practical lower bound. The selection is curated, not exhaustive: absence from this board implies nothing about an unlisted model.</p>
+        </details>
+        <details class="method-card">
+          <summary><span role="heading" aria-level="3">What is being evaluated?</span></summary>
+          <p>CERT-C, the secure-coding standard for C, has two categories: normative Rules, which compliance requires, and advisory Recommendations. This board targets all 115 Rules of the 2016 rule catalog and leaves Recommendations out of scope — the case count of 115 comes from covering every Rule. Each Rule contributes one single-function C case containing a violation. Difficulty is Medium, the middle of this project's three tiers (Simple / Medium / Complex): the fix stays within one function but is not a simple textual substitution. Rule IDs are shown; rule text is not redistributed. Whole-program analysis is out of scope.</p>
+        </details>
+        <details class="method-card">
+          <summary><span role="heading" aria-level="3">How are fixes evaluated?</span></summary>
+          <p>Each System receives the 115 violation cases and generates fixes, which pass through four gates in order: <strong>format</strong> (is the output in the required shape?), <strong>compile</strong> (does the fixed code compile?), <strong>programmatic</strong> (does it pass mechanical checks such as violation-pattern tests?), and <strong>rubric judge</strong> (an LLM Judge scores the fix against a rubric: is the violation actually resolved, was important behavior removed, and did the fix introduce a serious new bug?). The count that clears all four gates is <strong>Validation-passed</strong>.</p>
+          <p>The Judge identity (tool, model, epoch) is versioned; each row's <code>judge_epoch</code> in Details is the authoritative record. As of August 2026 the Judge is Codex CLI 0.147.0, requested model <code>gpt-5.6-sol</code>, reasoning high; OFF rows use a singleton epoch and HIGH rows a same-Rule max-3 batch epoch. Judging sends the private case code and the candidate fix to OpenAI via Codex CLI with ChatGPT sign-in; unlike generation routes, which require zero-data-retention endpoints, no ZDR, retention, or training-exclusion claim is made for the Judge route. The Judge is an evaluation instrument, not neutral ground truth.</p>
+        </details>
+        <details class="method-card">
+          <summary><span role="heading" aria-level="3">How was the evaluation data built?</span></summary>
+          <p>The cases were synthesized in OpenAI ChatGPT (Codex / Pro) sessions during this project's research phase, then comment-stripped, hash-frozen, and manifest-tracked. The pack is private and not redistributed, to preserve evaluation integrity. It is not an independent unseen holdout: the inputs existed during earlier research on this project. Note also that the same OpenAI family of models is used both to build the evaluation data and to judge the fixes; bias from this cannot be ruled out. It is disclosed, not corrected.</p>
+          <p>The earlier figures published in the CertFix repository's <a href="https://github.com/safe-c-ai/certfix/blob/main/docs/BENCHMARK_SUMMARY.md" rel="noreferrer">BENCHMARK_SUMMARY</a> come from a different protocol and a different Judge. The current Judge applies stricter semantic checks (violation persistence, behavior removal, new bugs), so numbers read lower across the board — do not read the difference as model degradation, and do not compare old and current scores as if they came from the same evaluation.</p>
+        </details>
+        <details class="method-card">
+          <summary><span role="heading" aria-level="3">What is the same across Systems, and what differs?</span></summary>
+          <p>Shared by every row: the 115-case evaluation pack, the repair prompt, the measurement workflow, and (within a mode) the Judge. Differing per row: the base model, the reasoning mode (OFF / HIGH), and the execution environment — provider, endpoint, quantization. The ranking's comparison axes are model × reasoning; execution details are recorded in each row's Details. This bundle of model + settings + execution environment is a <strong>System configuration</strong>, and scores belong to it, not to the model in general. Some rows differ in more than reasoning: a provider can change between OFF and HIGH, a row can combine multiple providers, and a model can appear in only one mode. Each row's Details panel is the authoritative record.</p>
+        </details>
+        <details class="method-card">
+          <summary><span role="heading" aria-level="3">How should the scores be read?</span></summary>
+          <p>Validation-passed is a workflow count, not a correctness, safety, merge, or adoption guarantee; real use still needs human review and existing tests or static analysis. With n = 115, rates carry 95% confidence intervals of roughly ±6–9 points, so many adjacent rankings are statistically indistinguishable — Rank is descriptive. Cost covers generation for this run only, excluding Judge and operator cost, and for most HIGH rows it is a reported subtotal (a lower bound) where provider failures lack cost telemetry (shown as "reported subtotal" in the tooltip).</p>
+        </details>
+      </div>
+
+      <p class="data-footnote" id="data-footnote">Measured aggregate · sanitized · <span id="footnote-group">—</span></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.1 Reasoning OFF / HIGH · measured aggregate</p>
+      <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
+      <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
+      <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>
+    </div>
+  </footer>
+
+  <dialog id="system-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow" id="dialog-rank">System configuration</p>
+        <h2 id="dialog-title">System details</h2>
+      </div>
+      <button class="dialog-close" id="dialog-close" type="button" aria-label="Close details">×</button>
+    </div>
+    <div id="dialog-content" class="dialog-content"></div>
+  </dialog>
+
+  <noscript>
+    <p class="noscript-note">This leaderboard renders the sanitized aggregate catalog with JavaScript. Please enable JavaScript, or read the JSON in <code>data/ranking.json</code> and <code>data/catalog.json</code>.</p>
+  </noscript>
+</body>
+</html>

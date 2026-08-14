@@ -1,0 +1,11 @@
+The data files in this directory (catalog.json, ranking.json, artifact_manifest.json)
+are sanitized aggregate benchmark measurements published by safe-c-ai.
+
+They are licensed under the Creative Commons Attribution 4.0 International License
+(CC BY 4.0): https://creativecommons.org/licenses/by/4.0/
+
+Attribution: "C Repair Leaderboard (safe-c-ai)" with a link to
+https://github.com/safe-c-ai/c-repair-leaderboard
+
+These files contain aggregate measurements only. No evaluation-case source code,
+fixed code, or model raw responses are included.
