@@ -2,8 +2,11 @@
 
 Measured comparisons of how well LLM systems repair C secure-coding violations, and at what cost.
 
-- **[CERT-C leaderboard](cert-c/)** — 115 CERT-C Rules, one Medium-difficulty case each.
-  Live page: `https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/`
+## Live leaderboard
+
+**[Open the CERT-C Repair Leaderboard →](https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/)**
+
+115 CERT-C Rules, one Medium-difficulty case each. (Site source: [`cert-c/`](cert-c/))
 
 Scores are measurements of frozen System configurations (model + provider + settings) on a
 private evaluation pack — not correctness guarantees and not model-general performance.
