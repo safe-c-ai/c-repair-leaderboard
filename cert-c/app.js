@@ -24,17 +24,34 @@ const CONTRACT = {
 
 const SITE_NAME = "CERT-C Repair Leaderboard";
 
-// Reasoning-mode colors (colorblind-safe blue/orange), shared by the scatter and legend.
-const MODE_COLOR = { off: "var(--mode-off)", high: "var(--mode-high)" };
-const colorForMode = (reasoning) => MODE_COLOR[reasoning] || "var(--accent)";
+// --- data contract: reasoning values the loader accepts (unchanged) ---
+// Per-row reasoning is off/high (API reasoning) or medium/xhigh (a local model's native
+// Thinking effort). These drive the manifest count cross-check in validate() and the
+// per-row badge/label text; they are NOT the chart's color axis (see grouping below).
+const REASONING_MODES = ["off", "high", "medium", "xhigh"];
+const ALLOWED_MODES = REASONING_MODES;
+const MODE_LABEL = { off: "OFF", high: "HIGH", medium: "MEDIUM", xhigh: "XHIGH" };
 
-// Bidirectional hover link between the scatter and the key chips below it.
-// Rebuilt each renderCostViews(); maps system_id -> { g, dot } and -> its chip <li>.
-const costFocus = { groups: new Map(), bars: new Map(), items: new Map() };
+// --- presentation grouping: OFF / HIGH / Other ---
+// OFF and HIGH keep first-class colors; every other reasoning (currently local Thinking
+// medium/xhigh) collapses into one neutral "Other" group. This avoids implying an
+// OFF/HIGH-style matrix that every other model would then need to fill. The exact
+// reasoning still shows per row via the badge text; only color/legend/filter group it.
+const GROUP_ORDER = ["off", "high", "other"];
+const groupOf = (reasoning) => (reasoning === "off" || reasoning === "high") ? reasoning : "other";
+const GROUP_COLOR = { off: "var(--mode-off)", high: "var(--mode-high)", other: "var(--mode-other)" };
+const colorForGroup = (group) => GROUP_COLOR[group] || "var(--accent)";
+const colorForMode = (reasoning) => colorForGroup(groupOf(reasoning));
+const GROUP_LABEL = { off: "OFF", high: "HIGH", other: "Other" };
+
+// Bidirectional hover link across the scatters, the rank bars, and the key chips.
+// Rebuilt each renderCostViews(). `points` is a flat list of every scatter point (a System
+// can appear in more than one scatter — cost and tokens — so it is a list, not a per-id map).
+const costFocus = { points: [], bars: new Map(), items: new Map() };
 function focusSystem(id) {
-  // Scatter points: dim others, pop the focused dot.
-  costFocus.groups.forEach((entry, sid) => {
-    const focused = id !== null && sid === id;
+  // Scatter points (across every scatter): dim others, pop the focused dots.
+  costFocus.points.forEach((entry) => {
+    const focused = id !== null && entry.systemId === id;
     entry.g.style.opacity = (id === null || focused) ? "1" : "0.22";
     entry.dot.setAttribute("r", focused ? "11" : "7");
     entry.dot.setAttribute("stroke-width", focused ? "3" : "2");
@@ -54,6 +71,7 @@ const state = {
   rows: [],
   query: "",
   modeFilter: "all",
+  metricTab: "cost", // which Decision-view scatter is shown: "cost" | "tokens"
   showCI: false,
   sortKey: "rank",
   sortDir: "asc",
@@ -71,8 +89,13 @@ const els = {
   brandName: document.querySelector("#brand-name"),
   footerSiteName: document.querySelector("#footer-site-name"),
   runDateChip: document.querySelector("#run-date-chip"),
+  chartLegend: document.querySelector("#chart-legend"),
   barChart: document.querySelector("#rank-chart"),
   chart: document.querySelector("#cost-chart"),
+  tokenChart: document.querySelector("#token-chart"),
+  metricTabs: document.querySelectorAll(".chart-tab"),
+  costCard: document.querySelector("#cost-card"),
+  tokenCard: document.querySelector("#token-card"),
   costList: document.querySelector("#cost-list"),
   toggleCI: document.querySelector("#toggle-ci"),
   dialog: document.querySelector("#system-dialog"),
@@ -150,10 +173,20 @@ function validate(ranking, catalog, manifest) {
     if (rankingIds.length !== entries || new Set(rankingIds).size !== entries) problems.push(`ranking must contain ${entries} unique System configurations (manifest.entries)`);
     if (catalogIds.length !== entries || new Set(catalogIds).size !== entries) problems.push(`catalog must contain ${entries} unique System configurations (manifest.entries)`);
     if ([...rankingIds].sort().join("\n") !== [...catalogIds].sort().join("\n")) problems.push("ranking/catalog System join mismatch");
-    if (ranking.systems.some((row) => !["off", "high"].includes(row.reasoning) || row.denominator !== CONTRACT.denominator)) problems.push(`ranking scope is not Medium ${CONTRACT.denominator} OFF/HIGH`);
-    const offN = ranking.systems.filter((row) => row.reasoning === "off").length;
-    const highN = ranking.systems.filter((row) => row.reasoning === "high").length;
-    if (offN !== manifest.reasoning_off_entries || highN !== manifest.reasoning_high_entries) problems.push(`OFF/HIGH counts do not match manifest: got ${offN}/${highN}, manifest ${manifest.reasoning_off_entries}/${manifest.reasoning_high_entries}`);
+    if (ranking.systems.some((row) => !ALLOWED_MODES.includes(row.reasoning) || row.denominator !== CONTRACT.denominator)) problems.push(`ranking scope is not Medium ${CONTRACT.denominator} in an allowed reasoning mode (${ALLOWED_MODES.join("/")})`);
+    // Cross-check each mode's row count against the manifest. off/high are required fields;
+    // medium/xhigh are optional local Thinking rows (absent field means the manifest
+    // declares zero of that mode).
+    const modeCount = (mode) => ranking.systems.filter((row) => row.reasoning === mode).length;
+    const declared = {
+      off: manifest.reasoning_off_entries,
+      high: manifest.reasoning_high_entries,
+      medium: manifest.qwen_native_thinking_medium_entries || 0,
+      xhigh: manifest.qwen_native_thinking_xhigh_entries || 0,
+    };
+    for (const mode of REASONING_MODES) {
+      if (modeCount(mode) !== declared[mode]) problems.push(`${MODE_LABEL[mode]} count does not match manifest: got ${modeCount(mode)}, manifest ${declared[mode]}`);
+    }
   }
   return problems;
 }
@@ -173,6 +206,13 @@ function buildRows(ranking, catalog) {
     const cost = gen ? gen.generation_cost_usd : null;
     const validationRate = sys.denominator ? sys.validation_passed / sys.denominator : null;
     const costPerPass = cost !== null && sys.validation_passed > 0 ? cost / sys.validation_passed : null;
+    // Total output tokens for the run (thinking + final answer combined). Reported for a
+    // subset of attempts on some Systems, so the sum is a lower bound when the reported
+    // attempt count is below the total attempt count.
+    const outputTokens = gen && gen.output_tokens != null ? gen.output_tokens : null;
+    const outputReported = gen ? gen.output_tokens_reported_attempts : null;
+    const attemptCount = gen ? gen.attempt_count : null;
+    const outputTokensPartial = outputReported != null && attemptCount != null && outputReported < attemptCount;
     const s = summary ? summary.system : {};
     return {
       rank: sys.rank,
@@ -191,6 +231,8 @@ function buildRows(ranking, catalog) {
       cost,
       costPerPass,
       costCompleteness: gen ? gen.cost_completeness : null,
+      outputTokens,
+      outputTokensPartial,
       summary,
       system: s,
       evaluatedAt: entry ? entry.evaluated_at : null,
@@ -224,7 +266,7 @@ const SORT = {
 function sortedRows() {
   const q = state.query.trim().toLowerCase();
   const rows = state.rows.filter((r) =>
-    (state.modeFilter === "all" || r.reasoning === state.modeFilter)
+    (state.modeFilter === "all" || groupOf(r.reasoning) === state.modeFilter)
     && (!q || r.searchText.includes(q)));
   const spec = SORT[state.sortKey] || SORT.rank;
   const factor = state.sortDir === "asc" ? 1 : -1;
@@ -240,6 +282,14 @@ function sortedRows() {
     if (cmp === 0) return a.rank - b.rank;
     return factor * cmp;
   });
+}
+
+// "10 OFF / 10 HIGH / 2 Other" — only presentation groups actually present, in fixed order.
+function modeBreakdown(rows) {
+  return GROUP_ORDER
+    .filter((g) => rows.some((r) => groupOf(r.reasoning) === g))
+    .map((g) => `${rows.filter((r) => groupOf(r.reasoning) === g).length} ${GROUP_LABEL[g]}`)
+    .join(" / ");
 }
 
 /* ---------- rendering: table ---------- */
@@ -281,7 +331,7 @@ function systemCell(row) {
     mark.setAttribute("aria-hidden", "true");
     name.append(mark);
   }
-  const tag = el("span", `mode-tag mode-${row.reasoning || "off"}`, row.reasoning ? row.reasoning.toUpperCase() : "—");
+  const tag = el("span", `mode-tag mode-${groupOf(row.reasoning)}`, row.reasoning ? row.reasoning.toUpperCase() : "—");
   tag.setAttribute("aria-hidden", "true"); // reasoning is also a labelled column
   const meta = el("span", "system-meta", [
     row.system.actual_provider || row.system.expected_provider,
@@ -375,7 +425,7 @@ function renderTable() {
   }
   const total = state.rows.length;
   els.resultSummary.textContent = rows.length === total
-    ? `${total} System configurations · ${state.rows.filter((r) => r.reasoning === "off").length} OFF / ${state.rows.filter((r) => r.reasoning === "high").length} HIGH`
+    ? `${total} System configurations · ${modeBreakdown(state.rows)}`
     : `${rows.length} of ${total} systems`;
 
   const spec = SORT[state.sortKey] || SORT.rank;
@@ -387,6 +437,19 @@ function renderTable() {
 }
 
 /* ---------- summary + chart ---------- */
+// Legend for the mode colors, built from the modes actually present so a data update that
+// adds or drops a mode needs no code edit (consistent with the manifest-driven contract).
+function renderLegend() {
+  if (!els.chartLegend) return;
+  const present = GROUP_ORDER.filter((g) => state.rows.some((r) => groupOf(r.reasoning) === g));
+  els.chartLegend.replaceChildren(...present.map((g) => {
+    const item = el("span", "legend-item");
+    const label = g === "other" ? "Other" : `Reasoning ${GROUP_LABEL[g]}`;
+    item.append(el("span", `legend-dot legend-${g}`), label);
+    return item;
+  }));
+}
+
 function renderRunMetadata() {
   const dates = [...new Set(state.rows.map((r) => r.evaluatedAt).filter(Boolean))].sort();
   const lastRunDate = dates.length ? dates[dates.length - 1] : "Not reported";
@@ -401,18 +464,21 @@ function svg(name, attrs, text) {
   return node;
 }
 
-// Cost-efficiency (Pareto) frontier for "upper-left favorable": keep points that no
-// other point weakly dominates (cost <= and rate >=, at least one strict). Sorted by cost.
-function paretoFrontier(points) {
+// Efficiency (Pareto) frontier for "upper-left favorable": keep points that no other point
+// weakly dominates (x <= and rate >=, at least one strict). Sorted by x. `valueOf` reads the
+// x metric (generation cost or total output tokens), so both scatters share this logic.
+function paretoFrontier(points, valueOf) {
   return points
     .filter((p) => !points.some((q) => q !== p
-      && q.cost <= p.cost && p.validationRate <= q.validationRate
-      && (q.cost < p.cost || q.validationRate > p.validationRate)))
-    .sort((a, b) => a.cost - b.cost);
+      && valueOf(q) <= valueOf(p) && p.validationRate <= q.validationRate
+      && (valueOf(q) < valueOf(p) || q.validationRate > p.validationRate)))
+    .sort((a, b) => valueOf(a) - valueOf(b));
 }
 
-// Shared hover tooltip (model, pass rate, CI, cost) for both the scatter and the bar chart.
-function createTooltip(target) {
+// Shared hover tooltip (model, pass rate, CI, and one metric row). `metricRow(p)` returns the
+// text of the last row — generation cost for the bar/cost views, output tokens for the token view.
+const costTipRow = (p) => `Generation cost ${money(p.cost)}${p.costCompleteness === "partial" ? " (reported subtotal)" : ""}`;
+function createTooltip(target, metricRow = costTipRow) {
   const tip = el("div", "chart-tip");
   tip.hidden = true;
   const hideTip = () => { tip.hidden = true; };
@@ -421,7 +487,7 @@ function createTooltip(target) {
       el("strong", "chart-tip-name", `Rank ${p.rank} · ${p.displayName} · ${p.reasoning.toUpperCase()}`),
       el("span", "chart-tip-row", `Validation-passed ${p.validationPassed} / ${p.denominator} (${pct(p.validationRate)})`),
       el("span", "chart-tip-row", ciText(p.validationCI)),
-      el("span", "chart-tip-row", `Generation cost ${money(p.cost)}${p.costCompleteness === "partial" ? " (reported subtotal)" : ""}`),
+      el("span", "chart-tip-row", metricRow(p)),
     );
     tip.hidden = false;
     const rect = target.getBoundingClientRect();
@@ -497,22 +563,45 @@ function renderBarChart(target, rows) {
   target.append(tip);
 }
 
-function renderChart(target, rows) {
-  const pts = rows.filter((r) => r.cost !== null && r.validationRate !== null);
+// Scatter configs: the two scatters share all geometry and differ only in the x metric,
+// its tick/tooltip formatting, and which rows carry the metric.
+function tokenTickLabel(v) {
+  if (v >= 1e6) return `${(v / 1e6).toFixed(v % 1e6 === 0 ? 0 : 1)}M`;
+  if (v >= 1e3) return `${Math.round(v / 1e3)}k`;
+  return String(v);
+}
+const COST_SCATTER = {
+  hasValue: (r) => r.cost !== null && r.cost !== undefined,
+  valueOf: (r) => r.cost,
+  emptyMsg: "No cost-complete systems to plot.",
+  tickLabel: (v) => (v >= 1 ? `$${v.toFixed(0)}` : `$${v.toFixed(2)}`),
+  axisLabel: "Generation cost for the 115-case run (USD, log scale)",
+  tipRow: costTipRow,
+};
+const TOKEN_SCATTER = {
+  hasValue: (r) => r.outputTokens !== null && r.outputTokens !== undefined,
+  valueOf: (r) => r.outputTokens,
+  emptyMsg: "No systems with token counts to plot.",
+  tickLabel: tokenTickLabel,
+  axisLabel: "Total output tokens for the 115-case run (thinking + final, log scale)",
+  tipRow: (p) => `Output tokens ${intOr(p.outputTokens)}${p.outputTokensPartial ? " (reported subtotal)" : ""}`,
+};
+
+function renderChart(target, rows, cfg = COST_SCATTER) {
+  const pts = rows.filter((r) => cfg.hasValue(r) && r.validationRate !== null);
   target.replaceChildren();
   if (!pts.length) {
-    target.append(el("p", "chart-hint", "No cost-complete systems to plot."));
+    target.append(el("p", "chart-hint", cfg.emptyMsg));
     return;
   }
   const W = 960, H = 420;
   const m = { top: 22, right: 28, bottom: 56, left: 62 };
   const pw = W - m.left - m.right, ph = H - m.top - m.bottom;
-  // X axis: log10 cost scale. Costs span ~2 orders of magnitude ($0.01–$3), so a
-  // linear axis crushes the cheap systems together and stretches the expensive ones.
-  // The domain snaps to 1-2-5 tick boundaries enclosing the data so every gridline
-  // lands on a round value ($0.01, $0.02, $0.05, $0.1, …) and the range stays tight.
-  const costs = pts.map((p) => p.cost);
-  const dataMinCost = Math.min(...costs), dataMaxCost = Math.max(...costs);
+  // X axis: log10 scale. The metric spans ~2 orders of magnitude, so a linear axis crushes
+  // the small values together and stretches the large ones. The domain snaps to 1-2-5 tick
+  // boundaries enclosing the data so every gridline lands on a round value and range is tight.
+  const xs = pts.map((p) => cfg.valueOf(p));
+  const dataMin = Math.min(...xs), dataMax = Math.max(...xs);
   const niceLogTicks = (lo, hi) => {
     const ticks = [];
     for (let e = Math.floor(Math.log10(lo)); e <= Math.ceil(Math.log10(hi)); e++) {
@@ -520,11 +609,11 @@ function renderChart(target, rows) {
     }
     return ticks;
   };
-  const allCostTicks = niceLogTicks(dataMinCost, dataMaxCost);
-  const domLo = Math.max(...allCostTicks.filter((t) => t <= dataMinCost + 1e-12));
-  const domHi = Math.min(...allCostTicks.filter((t) => t >= dataMaxCost - 1e-12));
+  const allXTicks = niceLogTicks(dataMin, dataMax);
+  const domLo = Math.max(...allXTicks.filter((t) => t <= dataMin + 1e-12));
+  const domHi = Math.min(...allXTicks.filter((t) => t >= dataMax - 1e-12));
   const loLog = Math.log10(domLo), hiLog = Math.log10(domHi);
-  const costTicks = allCostTicks.filter((t) => t >= domLo - 1e-12 && t <= domHi + 1e-12);
+  const xTicks = allXTicks.filter((t) => t >= domLo - 1e-12 && t <= domHi + 1e-12);
   // Y axis: nice-number validation-passed-rate ticks around the CI-padded data range,
   // so gridlines land on round percentages instead of arbitrary data-derived values.
   const lowerRates = pts.map((p) => p.validationCI ? p.validationCI.lower : p.validationRate);
@@ -548,40 +637,38 @@ function renderChart(target, rows) {
     root.append(svg("text", { x: m.left - 10, y: ly + 4, fill: label, "font-size": 12, "text-anchor": "end" }, pct(val, 0)));
   }
   // X gridlines at the snapped 1-2-5 log ticks.
-  const costTickLabel = (v) => (v >= 1 ? `$${v.toFixed(0)}` : `$${v.toFixed(2)}`);
-  for (const val of costTicks) {
+  for (const val of xTicks) {
     const lx = x(val);
     root.append(svg("line", { x1: lx, y1: m.top, x2: lx, y2: H - m.bottom, stroke: axis, "stroke-width": 1, opacity: .3 }));
-    root.append(svg("text", { x: lx, y: H - m.bottom + 22, fill: label, "font-size": 12, "text-anchor": "middle" }, costTickLabel(val)));
+    root.append(svg("text", { x: lx, y: H - m.bottom + 22, fill: label, "font-size": 12, "text-anchor": "middle" }, cfg.tickLabel(val)));
   }
-  root.append(svg("text", { x: m.left + pw / 2, y: H - 12, fill: "var(--ink-soft)", "font-size": 12.5, "text-anchor": "middle" }, "Generation cost for the 115-case run (USD, log scale)"));
+  root.append(svg("text", { x: m.left + pw / 2, y: H - 12, fill: "var(--ink-soft)", "font-size": 12.5, "text-anchor": "middle" }, cfg.axisLabel));
   root.append(svg("text", { x: 16, y: m.top + ph / 2, fill: "var(--ink-soft)", "font-size": 12.5, "text-anchor": "middle", transform: `rotate(-90 16 ${m.top + ph / 2})` }, "Validation-passed rate"));
 
-  // Per-mode cost-efficiency frontier (drawn behind the points). Same-mode only: OFF and
-  // HIGH use different Judge epochs, so cross-mode dominance is deliberately not asserted.
-  const frontierIds = new Set();
-  for (const mode of ["off", "high"]) {
-    const front = paretoFrontier(pts.filter((p) => p.reasoning === mode));
-    front.forEach((p) => frontierIds.add(p.systemId));
-    if (front.length < 2) continue;
-    // Staircase, not a diagonal: only the discrete Systems exist, so the line reads as
-    // "highest observed rate at or below this cost" (horizontal to the next cost, then up).
-    const cmds = [`M ${x(front[0].cost).toFixed(1)} ${y(front[0].validationRate).toFixed(1)}`];
+  // One combined efficiency frontier across every plotted System, regardless of reasoning
+  // mode (drawn behind the points). This mirrors the single unified ranking: all Systems
+  // compete together. Staircase, not a diagonal: only the discrete Systems exist, so the line
+  // reads as "highest observed rate at or below this x" (horizontal to the next x, then up).
+  // Neutral color so the line is not read as belonging to any one mode.
+  const front = paretoFrontier(pts, cfg.valueOf);
+  const frontierIds = new Set(front.map((p) => p.systemId));
+  if (front.length >= 2) {
+    const cmds = [`M ${x(cfg.valueOf(front[0])).toFixed(1)} ${y(front[0].validationRate).toFixed(1)}`];
     for (let i = 1; i < front.length; i++) {
-      const px = x(front[i].cost).toFixed(1);
+      const px = x(cfg.valueOf(front[i])).toFixed(1);
       cmds.push(`L ${px} ${y(front[i - 1].validationRate).toFixed(1)}`);
       cmds.push(`L ${px} ${y(front[i].validationRate).toFixed(1)}`);
     }
-    root.append(svg("path", { d: cmds.join(" "), class: "frontier-line", fill: "none", stroke: colorForMode(mode), "stroke-width": 1.5, "stroke-dasharray": "5 4", opacity: .5, "stroke-linecap": "round", "stroke-linejoin": "round" }));
+    root.append(svg("path", { d: cmds.join(" "), class: "frontier-line", fill: "none", stroke: "var(--ink-soft)", "stroke-width": 1.5, "stroke-dasharray": "5 4", opacity: .55, "stroke-linecap": "round", "stroke-linejoin": "round" }));
   }
 
-  // Text labels would collide at 18 points, so in the All view only the cost-efficiency
-  // frontier points are labelled (the ones a reader most needs named); a filtered single
-  // mode (<=10 points) labels every point. Non-frontier points stay named via chip/hover.
+  // Text labels would collide at many points, so in the All view only the frontier points are
+  // labelled (the ones a reader most needs named); a filtered single mode (<=10 points) labels
+  // every point. Non-frontier points stay named via chip/hover.
   const labelAll = pts.length <= 10;
-  const plotPoints = pts.map((p) => ({ p, cx: x(p.cost), cy: y(p.validationRate), color: colorForMode(p.reasoning) }));
+  const plotPoints = pts.map((p) => ({ p, cx: x(cfg.valueOf(p)), cy: y(p.validationRate), color: colorForMode(p.reasoning) }));
   // Each system's CI band + dot live in one <g> so hovering (here or in the list)
-  // can dim the other systems and isolate it. Groups are registered in costFocus.
+  // can dim the other systems and isolate it. Points are registered in costFocus.
   plotPoints.forEach(({ p, cx, cy, color }) => {
     const g = svg("g", { class: "point-group", "data-system-id": p.systemId });
     let ci = null;
@@ -596,11 +683,11 @@ function renderChart(target, rows) {
     const dot = svg("circle", { cx, cy, r: 7, fill: color, stroke: "var(--surface)", "stroke-width": 2 });
     g.append(dot);
     root.append(g);
-    costFocus.groups.set(p.systemId, { g, dot, ci });
+    costFocus.points.push({ systemId: p.systemId, g, dot, ci });
   });
 
-  // Interactive hover tooltip: model, pass rate, CI, cost.
-  const { tip, showTip, hideTip } = createTooltip(target);
+  // Interactive hover tooltip: model, pass rate, CI, and this scatter's metric.
+  const { tip, showTip, hideTip } = createTooltip(target, cfg.tipRow);
 
   const placedLabels = [];
   const hitCircles = [];
@@ -660,15 +747,18 @@ function shortName(name) {
 function renderCostList(target, sourceRows) {
   const rows = [...sourceRows].sort((a, b) => a.rank - b.rank);
   target.replaceChildren(...rows.map((r) => {
-    const li = el("li", "cost-list-item");
+    const noCost = r.cost === null || r.cost === undefined;
+    const li = el("li", `cost-list-item${noCost ? " no-cost" : ""}`);
     li.setAttribute("data-system-id", r.systemId);
-    li.setAttribute("title", `${r.displayName} · ${(r.reasoning || "").toUpperCase()} · ${pct(r.validationRate)} · ${money(r.cost)}`);
-    const dot = el("span", `cost-list-dot mode-${r.reasoning || "off"}`);
+    li.setAttribute("title", `${r.displayName} · ${(r.reasoning || "").toUpperCase()} · ${pct(r.validationRate)} · ${noCost ? "cost n/a (local, not plotted)" : money(r.cost)}`);
+    const dot = el("span", `cost-list-dot mode-${groupOf(r.reasoning)}`);
     const name = el("span", "cost-list-name", shortName(r.displayName));
     // Mode as text, not color alone (colorblind / print / screenshot safe).
     const mode = el("span", "cost-list-mode", `· ${r.reasoning ? r.reasoning.toUpperCase() : "—"}`);
     const rate = el("span", "cost-list-rate", pct(r.validationRate, 0));
     li.append(dot, name, mode, rate);
+    // Local rows carry no API cost, so they have no scatter point; flag them in the key.
+    if (noCost) li.append(el("span", "cost-list-na", "cost n/a"));
     li.addEventListener("mouseenter", () => focusSystem(r.systemId));
     li.addEventListener("mouseleave", () => focusSystem(null));
     costFocus.items.set(r.systemId, li);
@@ -677,12 +767,13 @@ function renderCostList(target, sourceRows) {
 }
 
 function renderCostViews() {
-  costFocus.groups.clear();
+  costFocus.points.length = 0;
   costFocus.bars.clear();
   costFocus.items.clear();
-  const rows = state.rows.filter((r) => state.modeFilter === "all" || r.reasoning === state.modeFilter);
+  const rows = state.rows.filter((r) => state.modeFilter === "all" || groupOf(r.reasoning) === state.modeFilter);
   renderBarChart(els.barChart, rows);
-  renderChart(els.chart, rows);
+  renderChart(els.chart, rows, COST_SCATTER);
+  if (els.tokenChart) renderChart(els.tokenChart, rows, TOKEN_SCATTER);
   renderCostList(els.costList, rows);
   focusSystem(null); // apply the current CI-visibility state to every freshly built chart
 }
@@ -783,12 +874,24 @@ function openDialog(row) {
   }
   const costItem = el("div", "detail-item");
   costItem.append(el("span", null, "Generation cost"), costVal);
+  // Some routes (e.g. local llama.cpp with a reasoning model) report a single completion-token
+  // total that bundles the thinking and the final answer, and do not break out a reasoning
+  // count. There, Output tokens is the combined total and Reasoning tokens is "included", not 0.
+  const combinedTokens = gen.reasoning_tokens === null
+    && gen.reasoning_tokens_completeness === "unavailable"
+    && row.reasoning !== "off";
+  const outputTokensText = combinedTokens
+    ? `${intOr(gen.output_tokens)} (thinking + final answer)`
+    : intOr(gen.output_tokens);
+  const reasoningTokensText = combinedTokens
+    ? "N/A — included in Output tokens"
+    : intOr(gen.reasoning_tokens);
   genGrid.append(
     costItem,
     detailItem("Currency", gen.currency),
     detailItem("Input tokens", intOr(gen.input_tokens)),
-    detailItem("Output tokens", intOr(gen.output_tokens)),
-    detailItem("Reasoning tokens", intOr(gen.reasoning_tokens)),
+    detailItem("Output tokens", outputTokensText),
+    detailItem("Reasoning tokens", reasoningTokensText),
     detailItem("Runtime", gen.runtime_seconds != null ? `${gen.runtime_seconds.toFixed(1)} s` : "—"),
     detailItem("Attempts", `${gen.attempt_count ?? "—"} for ${gen.case_count ?? "—"} cases`),
     detailItem("Cost completeness", gen.cost_completeness),
@@ -885,6 +988,28 @@ function bindCIToggle() {
   });
 }
 
+// Decision-view metric tabs: both scatters are always rendered (so hover/focus stay linked);
+// the tabs only toggle which card is visible, keeping the section to one screen height.
+function bindTabs() {
+  if (!els.metricTabs || !els.metricTabs.length) return;
+  const apply = () => {
+    if (els.costCard) els.costCard.hidden = state.metricTab !== "cost";
+    if (els.tokenCard) els.tokenCard.hidden = state.metricTab !== "tokens";
+  };
+  els.metricTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      state.metricTab = tab.dataset.tab;
+      els.metricTabs.forEach((t) => {
+        const on = t === tab;
+        t.classList.toggle("active", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+      apply();
+    });
+  });
+  apply();
+}
+
 function bindSort() {
   document.querySelectorAll(".sort-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -902,13 +1027,14 @@ function bindSort() {
 
 /* ---------- init ---------- */
 async function init() {
-  document.title = `${SITE_NAME} — v0.1`;
+  document.title = `${SITE_NAME} — v0.2`;
   els.brandName.textContent = SITE_NAME;
   els.brandLink.setAttribute("aria-label", `${SITE_NAME} home`);
   els.footerSiteName.textContent = SITE_NAME;
   bindSort();
   bindModeFilter();
   bindCIToggle();
+  bindTabs();
   els.search.addEventListener("input", (e) => {
     state.query = e.target.value;
     renderTable();
@@ -947,6 +1073,7 @@ async function init() {
   state.rows = buildRows(ranking, catalog);
   els.footnoteGroup.textContent = ranking.comparison_group || "";
   els.boardState.hidden = true;
+  renderLegend();
   renderRunMetadata();
   renderTable();
   renderCostViews();

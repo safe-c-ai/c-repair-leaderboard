@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>Repair leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260814-ogp">
-  <script src="app.js?v=20260814-ogp" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260815-changelog">
+  <script src="app.js?v=20260815-changelog" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -30,11 +30,11 @@
       </a>
       <nav aria-label="Primary">
         <a href="#overview">Results</a>
-        <a href="#cost">Cost vs. score</a>
+        <a href="#cost">Cost &amp; tokens</a>
         <a href="#leaderboard">Leaderboard</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.1</span>
+      <span class="edition-chip" title="Leaderboard version">v0.2</span>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -67,16 +67,13 @@
           <h2 id="overview-title">Validation-passed by rank</h2>
         </div>
         <div class="chart-controls">
-          <div class="chart-legend" aria-hidden="true">
-            <span class="legend-item"><span class="legend-dot legend-off"></span>Reasoning OFF</span>
-            <span class="legend-item"><span class="legend-dot legend-high"></span>Reasoning HIGH</span>
-          </div>
+          <div class="chart-legend" id="chart-legend" aria-hidden="true"></div>
           <button type="button" class="ci-toggle" id="toggle-ci" aria-pressed="false">Show 95% CI</button>
         </div>
       </div>
       <article class="cost-panel">
         <div class="chart-card">
-          <div id="rank-chart" class="chart" role="img" aria-label="Bar chart of validation-passed rate for all Reasoning OFF and HIGH systems, in rank order. Each bar is labelled with its system name and rate and colored by reasoning mode. Hover a bar for its 95% CI and cost."></div>
+          <div id="rank-chart" class="chart" role="img" aria-label="Bar chart of validation-passed rate for every system, in rank order. Each bar is labelled with its system name and reasoning mode and colored by mode group (OFF, HIGH, or Other). Hover a bar for its 95% CI and cost."></div>
           <p class="chart-hint">Each bar shows a system's validation-passed rate, colored by reasoning mode (see legend). Hover a bar for its 95% CI and generation cost.</p>
         </div>
       </article>
@@ -86,15 +83,23 @@
       <div class="section-heading">
         <div>
           <p class="eyebrow">Decision view</p>
-          <h2 id="cost-title">Validation-passed vs. generation cost</h2>
+          <h2 id="cost-title">Validation-passed vs. cost and output tokens</h2>
+        </div>
+        <div class="chart-tabs" role="tablist" aria-label="Efficiency metric">
+          <button type="button" class="chart-tab active" data-tab="cost" role="tab" aria-selected="true" aria-controls="cost-card">Generation cost</button>
+          <button type="button" class="chart-tab" data-tab="tokens" role="tab" aria-selected="false" aria-controls="token-card">Output tokens</button>
         </div>
       </div>
       <article class="cost-panel" aria-labelledby="cost-title">
-        <div class="chart-card">
-          <div id="cost-chart" class="chart" role="img" aria-label="Scatter plot of validation-passed rate against generation cost on a log scale, for all Reasoning OFF and HIGH systems. Upper-left is favorable. OFF and HIGH are shown in different colors. Frontier systems are labelled; hover any point for its exact rate, 95% CI, and cost. The key below lists every system in rank order."></div>
-          <p class="chart-hint">Upper-left is favorable. Dashed staircases trace each mode's cost-efficiency frontier; frontier systems are labelled. Hover any point for its exact rate, 95% CI, and cost; the key below lists every system in rank order.</p>
+        <div class="chart-card" id="cost-card" role="tabpanel" aria-label="Validation-passed vs. generation cost">
+          <div id="cost-chart" class="chart" role="img" aria-label="Scatter plot of validation-passed rate against generation cost on a log scale. Upper-left is favorable. Mode groups (OFF, HIGH, Other) are shown in different colors. Locally-run systems have no API cost and are not plotted. Frontier systems are labelled; hover any point for its exact rate, 95% CI, and cost. The key below lists every system in rank order."></div>
+          <p class="chart-hint">Upper-left is favorable. A dashed staircase traces the cost-efficiency frontier across all systems; frontier systems are labelled. Hover any point for its exact rate, 95% CI, and cost; the key below lists every system in rank order. Locally-run systems have no API generation cost and are not plotted (marked "cost n/a" in the key); see the FAQ.</p>
         </div>
-        <ol id="cost-list" class="cost-list" aria-label="Systems in rank order. Hover to highlight the matching point."></ol>
+        <div class="chart-card" id="token-card" role="tabpanel" aria-label="Validation-passed vs. total output tokens" hidden>
+          <div id="token-chart" class="chart" role="img" aria-label="Scatter plot of validation-passed rate against total output tokens on a log scale. Upper-left is favorable (higher pass rate for fewer tokens). Mode groups (OFF, HIGH, Other) are shown in different colors. Frontier systems are labelled; hover any point for its exact rate, 95% CI, and output-token count."></div>
+          <p class="chart-hint">A provider-price-independent view: upper-left is favorable (higher pass rate for fewer output tokens). A dashed staircase traces the token-efficiency frontier across all systems; frontier systems are labelled. Output tokens count thinking + final answer; where a system reports tokens for only part of its attempts the total is a reported subtotal (shown in the tooltip). Every system, including locally-run ones, is plotted here.</p>
+        </div>
+        <ol id="cost-list" class="cost-list" aria-label="Systems in rank order. Hover to highlight the matching point in the chart above."></ol>
       </article>
     </section>
 
@@ -116,13 +121,14 @@
           <button type="button" class="mode-chip active" data-mode="all" aria-pressed="true">All</button>
           <button type="button" class="mode-chip" data-mode="off" aria-pressed="false">OFF</button>
           <button type="button" class="mode-chip" data-mode="high" aria-pressed="false">HIGH</button>
+          <button type="button" class="mode-chip" data-mode="other" aria-pressed="false">Other</button>
         </div>
         <p class="toolbar-note" id="sort-note" aria-live="polite">Sorted by rank</p>
       </div>
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.1 Reasoning OFF and HIGH repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.2 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -193,11 +199,20 @@
         </details>
         <details class="method-card">
           <summary><span role="heading" aria-level="3">What is the same across Systems, and what differs?</span></summary>
-          <p>Shared by every row: the 115-case evaluation pack, the repair prompt, the measurement workflow, and (within a mode) the Judge. Differing per row: the base model, the reasoning mode (OFF / HIGH), and the execution environment — provider, endpoint, quantization. The ranking's comparison axes are model × reasoning; execution details are recorded in each row's Details. This bundle of model + settings + execution environment is a <strong>System configuration</strong>, and scores belong to it, not to the model in general. Some rows differ in more than reasoning: a provider can change between OFF and HIGH, a row can combine multiple providers, and a model can appear in only one mode. Each row's Details panel is the authoritative record.</p>
+          <p>Shared by every row: the 115-case evaluation pack, the repair prompt, the measurement workflow, and (within a mode) the Judge. Differing per row: the base model, the reasoning mode, and the execution environment — provider, endpoint, quantization. Reasoning mode is <strong>OFF / HIGH</strong> for API reasoning settings, or <strong>MEDIUM / XHIGH</strong> for a locally-run model's native Thinking effort. In the charts, OFF and HIGH keep their own colors and every other reasoning mode is grouped as <strong>Other</strong>, so the color axis does not imply an OFF/HIGH matrix that every model must fill; each row's exact mode still shows on its badge. This bundle of model + settings + execution environment is a <strong>System configuration</strong>, and scores belong to it, not to the model in general. Some rows differ in more than reasoning: a provider can change between modes, a row can combine multiple providers, and a model can appear in only one mode. Each row's Details panel is the authoritative record.</p>
+          <p>The maximum output-token limit follows the reasoning level and is a harness efficiency setting, not part of what is scored. When a provider stops a case at that limit (<code>finish_reason=length</code>), the harness treats the truncation as a budget artifact, not a repair failure: the case is re-generated once at a higher limit and the completed output is used. Each row's per-case token limits and any reruns are recorded in its Details.</p>
         </details>
         <details class="method-card">
           <summary><span role="heading" aria-level="3">How should the scores be read?</span></summary>
-          <p>Validation-passed is a workflow count, not a correctness, safety, merge, or adoption guarantee; real use still needs human review and existing tests or static analysis. With n = 115, rates carry 95% confidence intervals of roughly ±6–9 points, so many adjacent rankings are statistically indistinguishable — Rank is descriptive. Cost covers generation for this run only, excluding Judge and operator cost, and for most HIGH rows it is a reported subtotal (a lower bound) where provider failures lack cost telemetry (shown as "reported subtotal" in the tooltip).</p>
+          <p>Validation-passed is a workflow count, not a correctness, safety, merge, or adoption guarantee; real use still needs human review and existing tests or static analysis. With n = 115, rates carry 95% confidence intervals of roughly ±6–9 points, so many adjacent rankings are statistically indistinguishable — Rank is descriptive. Cost covers generation for this run only, excluding Judge and operator cost, and for most HIGH rows it is a reported subtotal (a lower bound) where provider failures lack cost telemetry (shown as "reported subtotal" in the tooltip). Locally-run systems have no API generation cost, so their cost is shown as "n/a" (not zero) and they are omitted from the cost-versus-score scatter; they still appear in the main-score chart and the ranking table.</p>
+        </details>
+        <details class="method-card">
+          <summary><span role="heading" aria-level="3">Changelog</span></summary>
+          <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
+          <ul class="changelog-list">
+            <li><strong>v0.2</strong> <span class="changelog-date">2026-08-15</span> — Reaching a provider's output-token limit (<code>finish_reason=length</code>) is now treated as a harness budget artifact and re-generated once at a higher limit, not scored as a repair failure. Grew from 19 to 22 Systems, adding a locally-run model at three Thinking efforts (grouped as "Other"). Replaced the Gemini HIGH row with a configuration under the new token-limit policy (88/115 → 91/115). Added a provider-price-independent "output tokens" efficiency view. The 115-case pack and Judge epoch are unchanged from v0.1.</li>
+            <li><strong>v0.1</strong> <span class="changelog-date">2026-08-14</span> — First public release: 19 Systems across Reasoning OFF and HIGH.</li>
+          </ul>
         </details>
       </div>
 
@@ -207,7 +222,7 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.1 Reasoning OFF / HIGH · measured aggregate</p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.2 · measured aggregate</p>
       <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>
