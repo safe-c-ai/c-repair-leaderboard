@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>Repair leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260815-changelog">
-  <script src="app.js?v=20260815-changelog" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260815-glm52">
+  <script src="app.js?v=20260815-glm52" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -34,7 +34,7 @@
         <a href="#leaderboard">Leaderboard</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.2</span>
+      <span class="edition-chip" title="Leaderboard version">v0.2.1</span>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -128,7 +128,7 @@
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.2 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.2.1 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -210,6 +210,7 @@
           <summary><span role="heading" aria-level="3">Changelog</span></summary>
           <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
           <ul class="changelog-list">
+            <li><strong>v0.2.1</strong> <span class="changelog-date">2026-08-15</span> — Added GLM-5.2 (OpenRouter · Sail Research · FP8) as two System rows: Reasoning HIGH (86/115) and Reasoning OFF (74/115), growing from 22 to 24 Systems. The two rows differ in more than reasoning level (8K vs 4K output limit, retry policy), so the gap is a per-System measurement, not a reasoning-only effect. The 115-case pack, measurement policy, and Judge epoch are unchanged from v0.2, so rows stay comparable within this version.</li>
             <li><strong>v0.2</strong> <span class="changelog-date">2026-08-15</span> — Reaching a provider's output-token limit (<code>finish_reason=length</code>) is now treated as a harness budget artifact and re-generated once at a higher limit, not scored as a repair failure. Grew from 19 to 22 Systems, adding a locally-run model at three Thinking efforts (grouped as "Other"). Replaced the Gemini HIGH row with a configuration under the new token-limit policy (88/115 → 91/115). Added a provider-price-independent "output tokens" efficiency view. The 115-case pack and Judge epoch are unchanged from v0.1.</li>
             <li><strong>v0.1</strong> <span class="changelog-date">2026-08-14</span> — First public release: 19 Systems across Reasoning OFF and HIGH.</li>
           </ul>
@@ -222,7 +223,7 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.2 · measured aggregate</p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.2.1 · measured aggregate</p>
       <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>

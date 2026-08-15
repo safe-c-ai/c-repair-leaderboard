@@ -2,7 +2,7 @@
   "comparison_group": "cert-c-medium-115-v1-rubric-v2-off-high",
   "data_kind": "sanitized_benchmark_ranking",
   "publication_allowed": true,
-  "schema_version": "medium-off-high-qwen38-local-gemini-adaptive-public-ranking-v1",
+  "schema_version": "medium-off-high-qwen38-gemini-adaptive-glm52-off-public-ranking-v1",
   "systems": [
     {
       "denominator": 115,
@@ -30,10 +30,8 @@
       },
       "rank": 2,
       "reasoning": "xhigh",
-      "reasoning_effort": "xhigh",
       "suspicious_logic_deletion": 1,
       "system_id": "qwen3.8-27b-unsloth-q4km-local-mtp-xhigh-adaptive-16384-32768-65536-v1",
-      "thinking": "on",
       "validation_passed": 97,
       "validation_passed_rate": 0.84347826087
     },
@@ -71,13 +69,28 @@
     },
     {
       "denominator": 115,
+      "display_name": "GLM-5.2",
+      "judge_eligible": 111,
+      "judge_verdict_counts": {
+        "fail": 25,
+        "pass": 86
+      },
+      "rank": 5,
+      "reasoning": "high",
+      "suspicious_logic_deletion": 1,
+      "system_id": "glm-5.2-openrouter-sail-research-fp8-high-8192-v1",
+      "validation_passed": 86,
+      "validation_passed_rate": 0.747826086957
+    },
+    {
+      "denominator": 115,
       "display_name": "DeepSeek V4 Pro",
       "judge_eligible": 110,
       "judge_verdict_counts": {
         "fail": 25,
         "pass": 85
       },
-      "rank": 5,
+      "rank": 6,
       "reasoning": "high",
       "suspicious_logic_deletion": 1,
       "system_id": "deepseek-v4-pro-openrouter-coreweave-fp8-high-8192-v1",
@@ -92,7 +105,7 @@
         "fail": 28,
         "pass": 82
       },
-      "rank": 6,
+      "rank": 7,
       "reasoning": "high",
       "suspicious_logic_deletion": 0,
       "system_id": "deepseek-v4-flash-0731-openrouter-coreweave-fp8-high-8192-v1",
@@ -107,7 +120,7 @@
         "fail": 22,
         "pass": 80
       },
-      "rank": 7,
+      "rank": 8,
       "reasoning": "high",
       "suspicious_logic_deletion": 0,
       "system_id": "qwen3.6-27b-openrouter-coreweave-fp8-high-16384-v1",
@@ -122,7 +135,7 @@
         "fail": 34,
         "pass": 79
       },
-      "rank": 8,
+      "rank": 9,
       "reasoning": "high",
       "suspicious_logic_deletion": 1,
       "system_id": "deepseek-v4-flash-0423-openrouter-coreweave-fp8-high-8192-v1",
@@ -138,7 +151,7 @@
         "pass": 79,
         "uncertain": 2
       },
-      "rank": 8,
+      "rank": 9,
       "reasoning": "off",
       "suspicious_logic_deletion": 0,
       "system_id": "gemini-3-flash-preview-openrouter-vertex-global-off-v1",
@@ -154,12 +167,10 @@
         "pass": 78,
         "uncertain": 1
       },
-      "rank": 10,
+      "rank": 11,
       "reasoning": "medium",
-      "reasoning_effort": "medium",
       "suspicious_logic_deletion": 1,
       "system_id": "qwen3.8-27b-unsloth-q4km-local-mtp-medium-16384-v1",
-      "thinking": "on",
       "validation_passed": 78,
       "validation_passed_rate": 0.678260869565
     },
@@ -171,7 +182,7 @@
         "fail": 28,
         "pass": 77
       },
-      "rank": 11,
+      "rank": 12,
       "reasoning": "off",
       "suspicious_logic_deletion": 0,
       "system_id": "gpt-5.6-luna-openrouter-azure-eu-off-v1",
@@ -186,12 +197,27 @@
         "fail": 33,
         "pass": 77
       },
-      "rank": 11,
+      "rank": 12,
       "reasoning": "high",
       "suspicious_logic_deletion": 2,
       "system_id": "step-3.7-flash-openrouter-deepinfra-unknown-high-8192-v1",
       "validation_passed": 77,
       "validation_passed_rate": 0.669565217391
+    },
+    {
+      "denominator": 115,
+      "display_name": "GLM-5.2",
+      "judge_eligible": 108,
+      "judge_verdict_counts": {
+        "fail": 34,
+        "pass": 74
+      },
+      "rank": 14,
+      "reasoning": "off",
+      "suspicious_logic_deletion": 2,
+      "system_id": "glm-5.2-openrouter-sail-research-fp8-off-4096-v1",
+      "validation_passed": 74,
+      "validation_passed_rate": 0.64347826087
     },
     {
       "denominator": 115,
@@ -202,7 +228,7 @@
         "pass": 74,
         "uncertain": 1
       },
-      "rank": 13,
+      "rank": 14,
       "reasoning": "high",
       "suspicious_logic_deletion": 0,
       "system_id": "mimo-v2.5-openrouter-explicit-provider-composite-high-8192-v1",
@@ -218,7 +244,7 @@
         "pass": 72,
         "uncertain": 2
       },
-      "rank": 14,
+      "rank": 16,
       "reasoning": "off",
       "suspicious_logic_deletion": 1,
       "system_id": "deepseek-v4-pro-openrouter-coreweave-fp8-off-v1",
@@ -233,7 +259,7 @@
         "fail": 37,
         "pass": 72
       },
-      "rank": 14,
+      "rank": 16,
       "reasoning": "high",
       "suspicious_logic_deletion": 0,
       "system_id": "minimax-m3-openrouter-venice-fp8-high-8192-v1",
@@ -249,12 +275,10 @@
         "pass": 72,
         "uncertain": 2
       },
-      "rank": 14,
+      "rank": 16,
       "reasoning": "off",
-      "reasoning_effort": "off",
       "suspicious_logic_deletion": 4,
       "system_id": "qwen3.8-27b-unsloth-q4km-local-mtp-off-4096-v1",
-      "thinking": "off",
       "validation_passed": 72,
       "validation_passed_rate": 0.626086956522
     },
@@ -267,7 +291,7 @@
         "pass": 68,
         "uncertain": 2
       },
-      "rank": 17,
+      "rank": 19,
       "reasoning": "off",
       "suspicious_logic_deletion": 4,
       "system_id": "deepseek-v4-flash-0731-openrouter-coreweave-fp8-off-v1",
@@ -283,7 +307,7 @@
         "pass": 68,
         "uncertain": 2
       },
-      "rank": 17,
+      "rank": 19,
       "reasoning": "off",
       "suspicious_logic_deletion": 1,
       "system_id": "hy3-openrouter-tencent-fp8-off-v1",
@@ -299,7 +323,7 @@
         "pass": 68,
         "uncertain": 2
       },
-      "rank": 17,
+      "rank": 19,
       "reasoning": "off",
       "suspicious_logic_deletion": 3,
       "system_id": "qwen3.6-27b-openrouter-ionet-fp8-off-v1",
@@ -314,7 +338,7 @@
         "fail": 46,
         "pass": 66
       },
-      "rank": 20,
+      "rank": 22,
       "reasoning": "off",
       "suspicious_logic_deletion": 3,
       "system_id": "deepseek-v4-flash-0423-openrouter-coreweave-fp8-off-v1",
@@ -330,7 +354,7 @@
         "pass": 60,
         "uncertain": 1
       },
-      "rank": 21,
+      "rank": 23,
       "reasoning": "off",
       "suspicious_logic_deletion": 1,
       "system_id": "minimax-m3-openrouter-venice-fp8-off-v1",
@@ -346,7 +370,7 @@
         "pass": 58,
         "uncertain": 2
       },
-      "rank": 22,
+      "rank": 24,
       "reasoning": "off",
       "suspicious_logic_deletion": 1,
       "system_id": "mimo-v2.5-openrouter-parasail-fp8-off-v1",
