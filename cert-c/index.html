@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>Repair leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260815-glm52">
-  <script src="app.js?v=20260815-glm52" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260823-v03">
+  <script src="app.js?v=20260823-v03" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -34,7 +34,7 @@
         <a href="#leaderboard">Leaderboard</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.2.1</span>
+      <span class="edition-chip" title="Leaderboard version">v0.3</span>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -92,12 +92,12 @@
       </div>
       <article class="cost-panel" aria-labelledby="cost-title">
         <div class="chart-card" id="cost-card" role="tabpanel" aria-label="Validation-passed vs. generation cost">
-          <div id="cost-chart" class="chart" role="img" aria-label="Scatter plot of validation-passed rate against generation cost on a log scale. Upper-left is favorable. Mode groups (OFF, HIGH, Other) are shown in different colors. Locally-run systems have no API cost and are not plotted. Frontier systems are labelled; hover any point for its exact rate, 95% CI, and cost. The key below lists every system in rank order."></div>
-          <p class="chart-hint">Upper-left is favorable. A dashed staircase traces the cost-efficiency frontier across all systems; frontier systems are labelled. Hover any point for its exact rate, 95% CI, and cost; the key below lists every system in rank order. Locally-run systems have no API generation cost and are not plotted (marked "cost n/a" in the key); see the FAQ.</p>
+          <div id="cost-chart" class="chart" role="img" aria-label="Scatter plot of validation-passed rate against generation cost on a log scale. Upper-left is favorable. Mode groups (OFF, HIGH, Other) are shown in different colors. Frontier systems are labelled; hover any point for its exact rate, 95% CI, and cost. The key below lists every system in rank order."></div>
+          <p class="chart-hint">Upper-left is favorable. A dashed staircase traces the cost-efficiency frontier across all systems; frontier systems are labelled. Hover any point for its exact rate, 95% CI, and cost; the key below lists every system in rank order. A system with no API generation cost would not be plotted (marked "cost n/a" in the key); see the FAQ.</p>
         </div>
         <div class="chart-card" id="token-card" role="tabpanel" aria-label="Validation-passed vs. total output tokens" hidden>
           <div id="token-chart" class="chart" role="img" aria-label="Scatter plot of validation-passed rate against total output tokens on a log scale. Upper-left is favorable (higher pass rate for fewer tokens). Mode groups (OFF, HIGH, Other) are shown in different colors. Frontier systems are labelled; hover any point for its exact rate, 95% CI, and output-token count."></div>
-          <p class="chart-hint">A provider-price-independent view: upper-left is favorable (higher pass rate for fewer output tokens). A dashed staircase traces the token-efficiency frontier across all systems; frontier systems are labelled. Output tokens count thinking + final answer; where a system reports tokens for only part of its attempts the total is a reported subtotal (shown in the tooltip). Every system, including locally-run ones, is plotted here.</p>
+          <p class="chart-hint">A provider-price-independent view: upper-left is favorable (higher pass rate for fewer output tokens). A dashed staircase traces the token-efficiency frontier across all systems; frontier systems are labelled. Output tokens count thinking + final answer; where a system reports tokens for only part of its attempts the total is a reported subtotal (shown in the tooltip). Every system is plotted here.</p>
         </div>
         <ol id="cost-list" class="cost-list" aria-label="Systems in rank order. Hover to highlight the matching point in the chart above."></ol>
       </article>
@@ -128,7 +128,7 @@
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.2.1 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.3 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -199,20 +199,52 @@
         </details>
         <details class="method-card">
           <summary><span role="heading" aria-level="3">What is the same across Systems, and what differs?</span></summary>
-          <p>Shared by every row: the 115-case evaluation pack, the repair prompt, the measurement workflow, and (within a mode) the Judge. Differing per row: the base model, the reasoning mode, and the execution environment — provider, endpoint, quantization. Reasoning mode is <strong>OFF / HIGH</strong> for API reasoning settings, or <strong>MEDIUM / XHIGH</strong> for a locally-run model's native Thinking effort. In the charts, OFF and HIGH keep their own colors and every other reasoning mode is grouped as <strong>Other</strong>, so the color axis does not imply an OFF/HIGH matrix that every model must fill; each row's exact mode still shows on its badge. This bundle of model + settings + execution environment is a <strong>System configuration</strong>, and scores belong to it, not to the model in general. Some rows differ in more than reasoning: a provider can change between modes, a row can combine multiple providers, and a model can appear in only one mode. Each row's Details panel is the authoritative record.</p>
+          <p>Shared by every row: the 115-case evaluation pack, the repair prompt, the measurement workflow, and (within a mode) the Judge. Differing per row: the base model, the reasoning mode, and the execution environment — provider, endpoint, quantization. Reasoning mode is <strong>OFF / HIGH</strong> for the two first-class API reasoning settings; any other thinking-effort setting (such as a model's <strong>MEDIUM / XHIGH</strong> effort) is grouped as <strong>Other</strong>. In the charts, OFF and HIGH keep their own colors and Other shares a single color, so the color axis does not imply an OFF/HIGH matrix that every model must fill; each row's exact mode still shows on its badge. This bundle of model + settings + execution environment is a <strong>System configuration</strong>, and scores belong to it, not to the model in general. Some rows differ in more than reasoning: a provider can change between modes, a row can combine multiple providers, and a model can appear in only one mode. Each row's Details panel is the authoritative record.</p>
           <p>The maximum output-token limit follows the reasoning level and is a harness efficiency setting, not part of what is scored. When a provider stops a case at that limit (<code>finish_reason=length</code>), the harness treats the truncation as a budget artifact, not a repair failure: the case is re-generated once at a higher limit and the completed output is used. Each row's per-case token limits and any reruns are recorded in its Details.</p>
         </details>
         <details class="method-card">
           <summary><span role="heading" aria-level="3">How should the scores be read?</span></summary>
-          <p>Validation-passed is a workflow count, not a correctness, safety, merge, or adoption guarantee; real use still needs human review and existing tests or static analysis. With n = 115, rates carry 95% confidence intervals of roughly ±6–9 points, so many adjacent rankings are statistically indistinguishable — Rank is descriptive. Cost covers generation for this run only, excluding Judge and operator cost, and for most HIGH rows it is a reported subtotal (a lower bound) where provider failures lack cost telemetry (shown as "reported subtotal" in the tooltip). Locally-run systems have no API generation cost, so their cost is shown as "n/a" (not zero) and they are omitted from the cost-versus-score scatter; they still appear in the main-score chart and the ranking table.</p>
+          <p>Validation-passed is a workflow count, not a correctness, safety, merge, or adoption guarantee; real use still needs human review and existing tests or static analysis. With n = 115, rates carry 95% confidence intervals of roughly ±6–9 points, so many adjacent rankings are statistically indistinguishable — Rank is descriptive. Cost covers generation for this run only, excluding Judge and operator cost, and for some rows it is a reported subtotal (a lower bound) where provider failures lack cost telemetry (shown as "reported subtotal" in the tooltip). If a system had no API generation cost, its cost would be shown as "n/a" (not zero) and it would be omitted from the cost-versus-score scatter while still appearing in the main-score chart and the ranking table.</p>
         </details>
         <details class="method-card">
           <summary><span role="heading" aria-level="3">Changelog</span></summary>
           <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
           <ul class="changelog-list">
-            <li><strong>v0.2.1</strong> <span class="changelog-date">2026-08-15</span> — Added GLM-5.2 (OpenRouter · Sail Research · FP8) as two System rows: Reasoning HIGH (86/115) and Reasoning OFF (74/115), growing from 22 to 24 Systems. The two rows differ in more than reasoning level (8K vs 4K output limit, retry policy), so the gap is a per-System measurement, not a reasoning-only effect. The 115-case pack, measurement policy, and Judge epoch are unchanged from v0.2, so rows stay comparable within this version.</li>
-            <li><strong>v0.2</strong> <span class="changelog-date">2026-08-15</span> — Reaching a provider's output-token limit (<code>finish_reason=length</code>) is now treated as a harness budget artifact and re-generated once at a higher limit, not scored as a repair failure. Grew from 19 to 22 Systems, adding a locally-run model at three Thinking efforts (grouped as "Other"). Replaced the Gemini HIGH row with a configuration under the new token-limit policy (88/115 → 91/115). Added a provider-price-independent "output tokens" efficiency view. The 115-case pack and Judge epoch are unchanged from v0.1.</li>
-            <li><strong>v0.1</strong> <span class="changelog-date">2026-08-14</span> — First public release: 19 Systems across Reasoning OFF and HIGH.</li>
+            <li>
+              <strong>v0.3</strong> <span class="changelog-date">2026-08-23</span>
+              <ul class="changelog-detail">
+                <li>Improved one evaluation case (FLP32-C) to better align its premise, reference fix, and Judge scope; the other 114 cases are unchanged.</li>
+                <li>All 23 listed Systems were re-generated and re-judged on the amended pack — results should not be compared row by row with v0.2.1 or earlier.</li>
+                <li>Withdrew the three locally-run Qwen3.8-27B Thinking rows (duplicate base-model-family coverage across execution routes).</li>
+                <li>Added Qwen3.8-27B (OpenRouter · FP8): Reasoning OFF (68/115) and XHIGH (101/115; an explicit CoreWeave/Reka provider composite). 24 → 23 Systems.</li>
+                <li>The two OpenRouter rows also differ in output limits and retry policy — the gap is a per-System measurement, not a reasoning-only effect.</li>
+                <li>Measurement policy and Judge epoch are unchanged from v0.2.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>v0.2.1</strong> <span class="changelog-date">2026-08-15</span>
+              <ul class="changelog-detail">
+                <li>Added GLM-5.2 (OpenRouter · Sail Research · FP8) as two System rows: Reasoning HIGH (86/115) and Reasoning OFF (74/115), growing from 22 to 24 Systems.</li>
+                <li>The two rows differ in more than reasoning level (8K vs 4K output limit, retry policy), so the gap is a per-System measurement, not a reasoning-only effect.</li>
+                <li>The 115-case pack, measurement policy, and Judge epoch are unchanged from v0.2, so rows stay comparable within this version.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>v0.2</strong> <span class="changelog-date">2026-08-15</span>
+              <ul class="changelog-detail">
+                <li>Reaching a provider's output-token limit (<code>finish_reason=length</code>) is now treated as a harness budget artifact and re-generated once at a higher limit, not scored as a repair failure.</li>
+                <li>Grew from 19 to 22 Systems, adding a locally-run model at three Thinking efforts (grouped as "Other").</li>
+                <li>Replaced the Gemini HIGH row with a configuration under the new token-limit policy (88/115 → 91/115).</li>
+                <li>Added a provider-price-independent "output tokens" efficiency view.</li>
+                <li>The 115-case pack and Judge epoch are unchanged from v0.1.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>v0.1</strong> <span class="changelog-date">2026-08-14</span>
+              <ul class="changelog-detail">
+                <li>First public release: 19 Systems across Reasoning OFF and HIGH.</li>
+              </ul>
+            </li>
           </ul>
         </details>
       </div>
@@ -223,7 +255,7 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.2.1 · measured aggregate</p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.3 · measured aggregate</p>
       <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>

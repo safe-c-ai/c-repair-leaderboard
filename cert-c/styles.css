@@ -708,9 +708,13 @@ a.system-name:hover { color: var(--accent-ink); text-decoration: underline; }
 .method-card p { margin: 0; padding: 0 18px 18px; font-size: .88rem; color: var(--ink-soft); }
 .method-card strong { color: var(--ink); }
 .changelog-list { margin: 0; padding: 0 18px 18px; list-style: none; }
-.changelog-list li { font-size: .88rem; color: var(--ink-soft); line-height: 1.5; }
-.changelog-list li + li { margin-top: 12px; }
+.changelog-list > li { font-size: .88rem; color: var(--ink-soft); line-height: 1.5; }
+.changelog-list > li + li { margin-top: 14px; }
 .changelog-date { margin-left: 4px; font-size: .82rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.changelog-detail { margin: 6px 0 0; padding-left: 20px; list-style: disc; }
+.changelog-detail li { font-size: .88rem; color: var(--ink-soft); line-height: 1.5; }
+.changelog-detail li + li { margin-top: 4px; }
+.changelog-detail li::marker { color: var(--ink-faint); }
 
 .caveat-panel {
   margin-top: 18px;
