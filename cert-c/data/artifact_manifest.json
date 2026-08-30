@@ -1,31 +1,24 @@
 {
   "added_system_ids": [
-    "qwen3.8-27b-openrouter-coreweave-fp8-off-4096-v1",
-    "qwen3.8-27b-openrouter-coreweave-reka-fp8-composite-xhigh-adaptive-16384-65536-v1"
+    "glm-5.3-flash-openrouter-novita-fp8-high-8192-v1"
   ],
-  "base_artifact_manifest_sha256": "343ce6eaa40295d7743a99236bc1e9307c52f0d23efb53b9895b9c9011fbc594",
-  "catalog_schema_version": "medium-off-high-v02-flp32-qwen38-openrouter-public-catalog-v1",
-  "catalog_sha256": "6ba00ba17626e21fbb2d2944f7e410132838f120379aeea763a98a50fd698b6e",
+  "base_artifact_manifest_sha256": "3d9316b2799a069c1755034999a89b2950ef44af7b20cc5e8bd4161b84709b18",
+  "catalog_schema_version": "medium-off-high-v02-flp32-qwen38-glm53-novita-public-catalog-v1",
+  "catalog_sha256": "a3e61fe41e8ec9108e72b1813f4206fc148da29ea9e0171adaf0eff4bd5ab1a9",
   "comparison_group": "cert-c-medium-115-v1-rubric-v2-off-high",
-  "entries": 23,
-  "leakage_report_sha256": "5b029151b55a4eb1cf75e011f308fde986931411cd399bf8800ce7d1cb10c1f3",
+  "entries": 24,
+  "leakage_report_sha256": "c979babff2cab8bf49f6cc4862e47da1fa9ee35b2a4b1266c070b7301a250996",
   "manifest_schema_version": "leaderboard-public-artifact-manifest-v1",
-  "private_ranking_sha256": "4055f28776bffe4503565534430d09cb3adf19703e52f825bcf162dc4d286d0f",
-  "public_ranking_sha256": "687222f6e234fb264ed2b36e2c67f8be9d86466927f65d45192682744a0c1ea5",
+  "public_ranking_sha256": "64f9c0676124fb23896e89ee5a3244cc4c883ac6233012172edc648b3b3afd80",
   "publication_allowed": true,
-  "publication_approval_evidence": "user-approval-2026-08-23-provider-recovery-and-qwen38-xhigh-listing",
+  "publication_approval_evidence": "user-direction-2026-08-30-provider-failures-must-be-recovered-before-listing",
   "qwen_native_thinking_xhigh_entries": 1,
-  "ranking_schema_version": "medium-off-high-v02-flp32-qwen38-openrouter-public-ranking-v1",
-  "reasoning_high_entries": 11,
+  "ranking_schema_version": "medium-off-high-v02-flp32-qwen38-glm53-novita-public-ranking-v1",
+  "reasoning_high_entries": 12,
   "reasoning_off_entries": 11,
   "reasoning_xhigh_entries": 1,
   "remote_push_or_pr": false,
   "sanitization": "passed",
   "status": "sanitized_public_data_ready",
-  "ui_included": false,
-  "withdrawn_system_ids": [
-    "qwen3.8-27b-unsloth-q4km-local-mtp-medium-16384-v1",
-    "qwen3.8-27b-unsloth-q4km-local-mtp-off-4096-v1",
-    "qwen3.8-27b-unsloth-q4km-local-mtp-xhigh-adaptive-16384-32768-65536-v1"
-  ]
+  "ui_included": false
 }
