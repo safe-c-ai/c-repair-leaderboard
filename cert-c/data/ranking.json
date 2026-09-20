@@ -2,7 +2,7 @@
   "comparison_caveat": "System/configuration comparison. Three legacy rows and Qwen3.8 XHIGH use disclosed provider composites; provider, routing, retry, reasoning and output limits are part of System identity.",
   "comparison_group": "cert-c-medium-115-v2-rubric-v2-off-high",
   "data_kind": "sanitized_benchmark_ranking",
-  "publication_allowed": false,
+  "publication_allowed": true,
   "schema_version": "medium-off-high-v02-ornith-cpu-onoff-public-ranking-v1",
   "systems": [
     {

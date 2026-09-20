@@ -63566,7 +63566,7 @@
       }
     }
   ],
-  "generated_at": "2026-09-20T09:55:17.201335Z",
+  "generated_at": "2026-09-20T10:05:18.780551Z",
   "notes": [
     "Sanitized aggregate results from the frozen private Medium 115 evaluation pack.",
     "OFF and score-ready HIGH configurations are ranked together as distinct Systems.",
@@ -63589,6 +63589,6 @@
     "GLM-5.3-Flash is a separately measured Novita FP8 extension using Reasoning HIGH, an 8K output ceiling, exact-provider routing, and technical retry only.",
     "Its displayed generation cost is normalized to the pre-discount equivalent; the temporary-discount actual is retained in reported_actual_generation_cost_usd."
   ],
-  "publication_allowed": false,
+  "publication_allowed": true,
   "schema_version": "medium-off-high-v02-ornith-cpu-onoff-public-catalog-v1"
 }
