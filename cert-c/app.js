@@ -25,12 +25,13 @@ const CONTRACT = {
 const SITE_NAME = "CERT-C Repair Leaderboard";
 
 // --- data contract: reasoning values the loader accepts (unchanged) ---
-// Per-row reasoning is off/high (API reasoning) or medium/xhigh (a local model's native
-// Thinking effort). These drive the manifest count cross-check in validate() and the
-// per-row badge/label text; they are NOT the chart's color axis (see grouping below).
-const REASONING_MODES = ["off", "high", "medium", "xhigh"];
+// Per-row reasoning is off/high (API reasoning) or medium/xhigh/on (a local model's native
+// Thinking effort; "on" is a native Thinking toggle without a graded effort). These drive
+// the manifest count cross-check in validate() and the per-row badge/label text; they are
+// NOT the chart's color axis (see grouping below).
+const REASONING_MODES = ["off", "high", "medium", "xhigh", "on"];
 const ALLOWED_MODES = REASONING_MODES;
-const MODE_LABEL = { off: "OFF", high: "HIGH", medium: "MEDIUM", xhigh: "XHIGH" };
+const MODE_LABEL = { off: "OFF", high: "HIGH", medium: "MEDIUM", xhigh: "XHIGH", on: "ON" };
 
 // --- presentation grouping: OFF / HIGH / Other ---
 // OFF and HIGH keep first-class colors; every other reasoning (currently local Thinking
@@ -175,7 +176,7 @@ function validate(ranking, catalog, manifest) {
     if ([...rankingIds].sort().join("\n") !== [...catalogIds].sort().join("\n")) problems.push("ranking/catalog System join mismatch");
     if (ranking.systems.some((row) => !ALLOWED_MODES.includes(row.reasoning) || row.denominator !== CONTRACT.denominator)) problems.push(`ranking scope is not Medium ${CONTRACT.denominator} in an allowed reasoning mode (${ALLOWED_MODES.join("/")})`);
     // Cross-check each mode's row count against the manifest. off/high are required fields;
-    // medium/xhigh are optional local Thinking rows (absent field means the manifest
+    // medium/xhigh/on are optional local Thinking rows (absent field means the manifest
     // declares zero of that mode).
     const modeCount = (mode) => ranking.systems.filter((row) => row.reasoning === mode).length;
     const declared = {
@@ -183,6 +184,7 @@ function validate(ranking, catalog, manifest) {
       high: manifest.reasoning_high_entries,
       medium: manifest.qwen_native_thinking_medium_entries || 0,
       xhigh: manifest.qwen_native_thinking_xhigh_entries || 0,
+      on: manifest.cpu_native_thinking_on_entries || 0,
     };
     for (const mode of REASONING_MODES) {
       if (modeCount(mode) !== declared[mode]) problems.push(`${MODE_LABEL[mode]} count does not match manifest: got ${modeCount(mode)}, manifest ${declared[mode]}`);

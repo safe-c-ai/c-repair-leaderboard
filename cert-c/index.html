@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>Repair leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260830-v031">
-  <script src="app.js?v=20260830-v031" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260920-v032">
+  <script src="app.js?v=20260920-v032" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -34,7 +34,7 @@
         <a href="#leaderboard">Leaderboard</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.3.1</span>
+      <span class="edition-chip" title="Leaderboard version">v0.3.2</span>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -128,7 +128,7 @@
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.3.1 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.3.2 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -184,6 +184,10 @@
           <p>To help you choose, from measurements, which model and which settings to use for automated CERT-C violation repair. The board compares repair performance and generation cost across configurations on the same evaluation pack. The base models were selected from widely used models on <a href="https://openrouter.ai/rankings" rel="noreferrer">OpenRouter's public rankings</a>, prioritizing strong performance at low cost, with Qwen3.6-27B — this project's baseline — as the practical lower bound. The selection is curated, not exhaustive: absence from this board implies nothing about an unlisted model.</p>
         </details>
         <details class="method-card">
+          <summary><span role="heading" aria-level="3">Which system should I use?</span></summary>
+          <p>Performance first: start at the top of "Validation-passed by rank". Cost or token efficiency first: start at the upper-left of "Validation-passed vs. cost and output tokens", where the dashed frontier marks the best measured trade-offs. Two cautions: scores belong to the whole System configuration (model, provider, quantization, settings), not to the base model in general, and reasoning labels such as HIGH, XHIGH, or ON are model- and provider-specific settings, not equal compute. See "How should the scores be read?" for what the numbers do and do not guarantee.</p>
+        </details>
+        <details class="method-card">
           <summary><span role="heading" aria-level="3">What is being evaluated?</span></summary>
           <p>CERT-C, the secure-coding standard for C, has two categories: normative Rules, which compliance requires, and advisory Recommendations. This board targets all 115 Rules of the 2016 rule catalog and leaves Recommendations out of scope — the case count of 115 comes from covering every Rule. Each Rule contributes one single-function C case containing a violation. Difficulty is Medium, the middle of this project's three tiers (Simple / Medium / Complex): the fix stays within one function but is not a simple textual substitution. Rule IDs are shown; rule text is not redistributed. Whole-program analysis is out of scope.</p>
         </details>
@@ -210,6 +214,15 @@
           <summary><span role="heading" aria-level="3">Changelog</span></summary>
           <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
           <ul class="changelog-list">
+            <li>
+              <strong>v0.3.2</strong> <span class="changelog-date">2026-09-20</span>
+              <ul class="changelog-detail">
+                <li>Added Ornith-1.5-35B-A3B Q4_K_M, a locally-run model on CPU, at native Thinking ON (80/115) and OFF (61/115), growing from 24 to 26 Systems. Local runs have no API generation cost, so they appear in the ranking and the output-token view but not the cost scatter.</li>
+                <li>One ON case (MSC38-C) was stopped by the operator after ~100K output tokens; it is counted as a non-pass in the 115-case denominator, not treated as a provider failure.</li>
+                <li>Added a FAQ entry, "Which system should I use?", on reading the two charts to pick a system.</li>
+                <li>The 115-case pack, measurement policy, and Judge epoch are unchanged from v0.3, so rows stay comparable within this version.</li>
+              </ul>
+            </li>
             <li>
               <strong>v0.3.1</strong> <span class="changelog-date">2026-08-30</span>
               <ul class="changelog-detail">
@@ -263,7 +276,7 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.3.1 · measured aggregate</p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.3.2 · measured aggregate</p>
       <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>

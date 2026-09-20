@@ -1,24 +1,29 @@
 {
   "added_system_ids": [
-    "glm-5.3-flash-openrouter-novita-fp8-high-8192-v1"
+    "ornith15-35b-q4km-cpu-thinking-adaptive-32768-65536-131072-v1-nr-ram64"
   ],
-  "base_artifact_manifest_sha256": "3d9316b2799a069c1755034999a89b2950ef44af7b20cc5e8bd4161b84709b18",
-  "catalog_schema_version": "medium-off-high-v02-flp32-qwen38-glm53-novita-public-catalog-v1",
-  "catalog_sha256": "a3e61fe41e8ec9108e72b1813f4206fc148da29ea9e0171adaf0eff4bd5ab1a9",
-  "comparison_group": "cert-c-medium-115-v1-rubric-v2-off-high",
-  "entries": 24,
-  "leakage_report_sha256": "c979babff2cab8bf49f6cc4862e47da1fa9ee35b2a4b1266c070b7301a250996",
+  "base_artifact_manifest_sha256": "3e51832a6d6b626b1aced3d2d4ef3134497ee0620ee23cb76d29acccd20d0957",
+  "catalog_schema_version": "medium-off-high-v02-ornith-cpu-onoff-public-catalog-v1",
+  "catalog_sha256": "1dc228532628a35cbc567fc8d4d0f9fcda3c41edc87a57148d3f395af8c22e19",
+  "comparison_group": "cert-c-medium-115-v2-rubric-v2-off-high",
+  "cpu_native_thinking_on_entries": 1,
+  "entries": 26,
+  "leakage_report_sha256": "67ffe3965b8b725944cf8345dce17e942bc6578c9d8149011dc8503ff09dc474",
   "manifest_schema_version": "leaderboard-public-artifact-manifest-v1",
-  "public_ranking_sha256": "64f9c0676124fb23896e89ee5a3244cc4c883ac6233012172edc648b3b3afd80",
+  "public_ranking_sha256": "827ebeb63f3e286cf7e8d536f5f8c88ebe6b5afb2e107bc6df95676bf9e94f06",
   "publication_allowed": true,
-  "publication_approval_evidence": "user-direction-2026-08-30-provider-failures-must-be-recovered-before-listing",
+  "publication_approval_evidence": {
+    "date": "2026-09-20",
+    "decision": "user approved option A: include Ornith CPU Thinking ON (80/115) and OFF (61/115) rows",
+    "scope": "local prototype sync and publication; remote push remains a separate approval"
+  },
   "qwen_native_thinking_xhigh_entries": 1,
-  "ranking_schema_version": "medium-off-high-v02-flp32-qwen38-glm53-novita-public-ranking-v1",
+  "ranking_schema_version": "medium-off-high-v02-ornith-cpu-onoff-public-ranking-v1",
   "reasoning_high_entries": 12,
-  "reasoning_off_entries": 11,
+  "reasoning_off_entries": 12,
   "reasoning_xhigh_entries": 1,
   "remote_push_or_pr": false,
   "sanitization": "passed",
-  "status": "sanitized_public_data_ready",
+  "status": "sanitized_publication_approved",
   "ui_included": false
 }
