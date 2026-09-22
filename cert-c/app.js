@@ -1029,7 +1029,7 @@ function bindSort() {
 
 /* ---------- init ---------- */
 async function init() {
-  document.title = `${SITE_NAME} — v0.2.1`;
+  document.title = SITE_NAME;
   els.brandName.textContent = SITE_NAME;
   els.brandLink.setAttribute("aria-label", `${SITE_NAME} home`);
   els.footerSiteName.textContent = SITE_NAME;
