@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>Repair leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260920-v032">
-  <script src="app.js?v=20260920-v032" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260922-v033">
+  <script src="app.js?v=20260922-v033" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -34,7 +34,7 @@
         <a href="#leaderboard">Leaderboard</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.3.2</span>
+      <span class="edition-chip" title="Leaderboard version">v0.3.3</span>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -128,7 +128,7 @@
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.3.2 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.3.3 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -215,6 +215,14 @@
           <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
           <ul class="changelog-list">
             <li>
+              <strong>v0.3.3</strong> <span class="changelog-date">2026-09-22</span>
+              <ul class="changelog-detail">
+                <li>Added DeepSeek V4.1 Flash (OpenRouter · DeepInfra · FP8) at Reasoning OFF (73/115) and HIGH (100/115), growing from 26 to 28 Systems.</li>
+                <li>The HIGH row is a disclosed output-ceiling composite: 65 cases from an 8K run and 50 cases generated at 32K after the 8K run aborted. This is a run-order split, not per-case escalation; 11 of the 32K outputs exceed 8K tokens. The 8K-run retries were later diagnosed as output-budget truncation misclassified as transport failures, and 7 retained cases came from a second or third 8K sample. See the row's Details for the full caveats.</li>
+                <li>The 115-case pack, measurement policy, and Judge epoch are unchanged from v0.3, so rows stay comparable within this version.</li>
+              </ul>
+            </li>
+            <li>
               <strong>v0.3.2</strong> <span class="changelog-date">2026-09-20</span>
               <ul class="changelog-detail">
                 <li>Added Ornith-1.5-35B-A3B Q4_K_M, a locally-run model on CPU, at native Thinking ON (80/115) and OFF (61/115), growing from 24 to 26 Systems. Local runs have no API generation cost, so they appear in the ranking and the output-token view but not the cost scatter.</li>
@@ -276,7 +284,7 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.3.2 · measured aggregate</p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.3.3 · measured aggregate</p>
       <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>

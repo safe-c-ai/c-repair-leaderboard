@@ -1,29 +1,31 @@
 {
   "added_system_ids": [
-    "ornith15-35b-q4km-cpu-thinking-adaptive-32768-65536-131072-v1-nr-ram64"
+    "deepseek-v4.1-flash-openrouter-deepinfra-fp8-off-4096-v1",
+    "deepseek-v4.1-flash-openrouter-deepinfra-fp8-high-8k-32k-v1"
   ],
-  "base_artifact_manifest_sha256": "3e51832a6d6b626b1aced3d2d4ef3134497ee0620ee23cb76d29acccd20d0957",
-  "catalog_schema_version": "medium-off-high-v02-ornith-cpu-onoff-public-catalog-v1",
-  "catalog_sha256": "05bd3558b8ff4ca0a3caa06140890faf70165ebedcc1f5266a658a05961e9800",
+  "base_artifact_manifest_sha256": "59b3ede2e0b734092de9e6d76ef4854a718e8c5a2dc546dbaf50d6ea0b719fe5",
+  "catalog_schema_version": "medium-off-high-v02-deepseek-v41-deepinfra-public-catalog-v1",
+  "catalog_sha256": "24fdbf015772291bc3bcd4bf8ee383204455536948927563674a20ee8ccb30a4",
   "comparison_group": "cert-c-medium-115-v2-rubric-v2-off-high",
   "cpu_native_thinking_on_entries": 1,
-  "entries": 26,
-  "leakage_report_sha256": "67ffe3965b8b725944cf8345dce17e942bc6578c9d8149011dc8503ff09dc474",
+  "entries": 28,
+  "leakage_report_sha256": "c17b9545761f35db255dc096b28d1fc84b1679ed5a04d665cc6e127c2cc1e1bc",
   "manifest_schema_version": "leaderboard-public-artifact-manifest-v1",
-  "public_ranking_sha256": "53048b51a0dce2e5c6607536e7f0ef57d468e56f7d0524e23c1be0fdd69c8418",
+  "public_ranking_sha256": "c4fc103a2fb008fabc23cbc95bf9fe245c2a5bdc4d006f231c962a38530e6e30",
   "publication_allowed": true,
   "publication_approval_evidence": {
-    "date": "2026-09-20",
-    "decision": "user approved option A: include Ornith CPU Thinking ON (80/115) and OFF (61/115) rows",
-    "scope": "local prototype sync and publication; remote push remains a separate approval"
+    "date": "2026-09-22",
+    "decision": "user requested local prototype sync of DeepSeek V4.1 Flash OFF (73/115) and HIGH 8K/32K composite (100/115) after caveat review",
+    "scope": "local prototype sync and user visual review; remote push and live publication remain a separate approval"
   },
   "qwen_native_thinking_xhigh_entries": 1,
-  "ranking_schema_version": "medium-off-high-v02-ornith-cpu-onoff-public-ranking-v1",
-  "reasoning_high_entries": 12,
-  "reasoning_off_entries": 12,
+  "ranking_schema_version": "medium-off-high-v02-deepseek-v41-deepinfra-public-ranking-v1",
+  "reasoning_high_entries": 13,
+  "reasoning_off_entries": 13,
   "reasoning_xhigh_entries": 1,
   "remote_push_or_pr": false,
   "sanitization": "passed",
+  "source_artifact_manifest_sha256": "20cf949159f319ad16d62995c92ea8292814f5418d1d0b0adbb51cf666c7c23e",
   "status": "sanitized_publication_approved",
   "ui_included": false
 }
