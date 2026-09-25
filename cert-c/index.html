@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>CERT-C Repair Leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260922-v033">
-  <script src="app.js?v=20260922-v033b" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260924-v04">
+  <script src="app.js?v=20260924-v04" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -34,7 +34,7 @@
         <a href="#leaderboard">Leaderboard</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.3.3</span>
+      <span class="edition-chip" title="Leaderboard version">v0.4</span>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -128,7 +128,7 @@
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.3.3 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.4 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -195,6 +195,7 @@
           <summary><span role="heading" aria-level="3">How are fixes evaluated?</span></summary>
           <p>Each System receives the 115 violation cases and generates fixes, which pass through four gates in order: <strong>format</strong> (is the output in the required shape?), <strong>compile</strong> (does the fixed code compile?), <strong>programmatic</strong> (does it pass mechanical checks such as violation-pattern tests?), and <strong>rubric judge</strong> (an LLM Judge scores the fix against a rubric: is the violation actually resolved, was important behavior removed, and did the fix introduce a serious new bug?). The count that clears all four gates is <strong>Validation-passed</strong>.</p>
           <p>The Judge identity (tool, model, epoch) is versioned; each row's <code>judge_epoch</code> in Details is the authoritative record. As of August 2026 the Judge is Codex CLI 0.147.0, requested model <code>gpt-5.6-sol</code>, reasoning high; OFF rows use a singleton epoch and HIGH rows a same-Rule max-3 batch epoch. Judging sends the private case code and the candidate fix to OpenAI via Codex CLI with ChatGPT sign-in; unlike generation routes, which require zero-data-retention endpoints, no ZDR, retention, or training-exclusion claim is made for the Judge route. The Judge is an evaluation instrument, not neutral ground truth.</p>
+          <p>Different Systems sometimes produce byte-identical fixes for the same case. Since v0.4, when the Judge's verdicts on such an identical fix disagree, they are unified by majority vote (pass vs. not pass) across the listed Systems; ties keep the original verdicts. This makes identical code score identically, but a majority is not proof of correctness, and adding Systems can change a group's majority and therefore existing rows' scores. Each affected row's Details keeps the automated Judge score before unification.</p>
         </details>
         <details class="method-card">
           <summary><span role="heading" aria-level="3">How was the evaluation data built?</span></summary>
@@ -204,7 +205,7 @@
         <details class="method-card">
           <summary><span role="heading" aria-level="3">What is the same across Systems, and what differs?</span></summary>
           <p>Shared by every row: the 115-case evaluation pack, the repair prompt, the measurement workflow, and (within a mode) the Judge. Differing per row: the base model, the reasoning mode, and the execution environment — provider, endpoint, quantization. Reasoning mode is <strong>OFF / HIGH</strong> for the two first-class API reasoning settings; any other thinking-effort setting (such as a model's <strong>MEDIUM / XHIGH</strong> effort) is grouped as <strong>Other</strong>. In the charts, OFF and HIGH keep their own colors and Other shares a single color, so the color axis does not imply an OFF/HIGH matrix that every model must fill; each row's exact mode still shows on its badge. This bundle of model + settings + execution environment is a <strong>System configuration</strong>, and scores belong to it, not to the model in general. Some rows differ in more than reasoning: a provider can change between modes, a row can combine multiple providers, and a model can appear in only one mode. Each row's Details panel is the authoritative record.</p>
-          <p>The maximum output-token limit follows the reasoning level and is a harness efficiency setting, not part of what is scored. When a provider stops a case at that limit (<code>finish_reason=length</code>), the harness treats the truncation as a budget artifact, not a repair failure: the case is re-generated once at a higher limit and the completed output is used. Each row's per-case token limits and any reruns are recorded in its Details.</p>
+          <p>The maximum output-token limit follows the reasoning level and is a harness efficiency setting, not part of what is scored. When a provider stops a case at that limit (<code>finish_reason=length</code>), the harness treats the truncation as a budget artifact, not a repair failure: the case is re-generated once — at a higher limit, or at the same limit when the System already runs at its fixed ceiling — and the completed output is used. Each row's per-case token limits and any reruns are recorded in its Details.</p>
         </details>
         <details class="method-card">
           <summary><span role="heading" aria-level="3">How should the scores be read?</span></summary>
@@ -214,6 +215,17 @@
           <summary><span role="heading" aria-level="3">Changelog</span></summary>
           <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
           <ul class="changelog-list">
+            <li>
+              <strong>v0.4</strong> <span class="changelog-date">2026-09-25</span>
+              <ul class="changelog-detail">
+                <li>Scoring change: when two or more Systems produced a byte-identical fix for the same case, the Judge sometimes gave them different verdicts. Those verdicts are now unified by majority vote (pass vs. not pass) across all 32 listed Systems; tied groups keep their original verdicts. Of 23 disagreeing groups, 17 were unified (39 verdicts changed: 25 to pass, 14 from pass) and 6 ties were left as judged. No case was re-judged or re-generated.</li>
+                <li>As a result, 16 of the 28 previously listed rows changed by 1–2 points (for example, MiniMax M3 HIGH 73 → 75, Ornith Thinking ON 80 → 78). Each affected row's Details shows the automated Judge score before unification.</li>
+                <li>Added GPT-6 Luna (OpenRouter · Azure) at Reasoning OFF (85/115) and HIGH (106/115, rank 1), and MiMo-V2.6-Flash (OpenRouter · DeepInfra · FP8) at Reasoning OFF (69/115) and HIGH (93/115), growing from 28 to 32 Systems.</li>
+                <li>Several new rows needed retries or approved re-tests after provider-side failures (rate limits, responses missing a model ID); these are not scored as repair failures. The MiMo-V2.6 HIGH row combines an initial run with three same-provider recovery rounds. See each row's Details.</li>
+                <li>Removed a leftover draft-status note from the two Ornith rows' Details, and added a note to rows where a Judge response was invalid and counted as not passed.</li>
+                <li>Because the scoring rule changed, rows are not comparable with v0.3.3 or earlier.</li>
+              </ul>
+            </li>
             <li>
               <strong>v0.3.3</strong> <span class="changelog-date">2026-09-22</span>
               <ul class="changelog-detail">
@@ -284,7 +296,7 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.3.3 · measured aggregate</p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.4 · measured aggregate</p>
       <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>
