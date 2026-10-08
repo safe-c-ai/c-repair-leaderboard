@@ -57,6 +57,7 @@ function focusSystem(id) {
     entry.dot.setAttribute("r", focused ? "11" : "7");
     entry.dot.setAttribute("stroke-width", focused ? "3" : "2");
     if (entry.ci) entry.ci.style.display = (state.showCI || focused) ? "" : "none";
+    if (entry.label) entry.label.style.display = focused ? "" : "none";
   });
   // Rank bars: dim others; CI whisker shows on focus or when the CI toggle is on.
   costFocus.bars.forEach((entry, sid) => {
@@ -90,6 +91,8 @@ const els = {
   brandName: document.querySelector("#brand-name"),
   footerSiteName: document.querySelector("#footer-site-name"),
   runDateChip: document.querySelector("#run-date-chip"),
+  heroStats: document.querySelector("#hero-stats"),
+  changelog: document.querySelector("#changelog"),
   chartLegend: document.querySelector("#chart-legend"),
   barChart: document.querySelector("#rank-chart"),
   chart: document.querySelector("#cost-chart"),
@@ -334,7 +337,8 @@ function systemCell(row) {
     name.append(mark);
   }
   const tag = el("span", `mode-tag mode-${groupOf(row.reasoning)}`, row.reasoning ? row.reasoning.toUpperCase() : "—");
-  tag.setAttribute("aria-hidden", "true"); // reasoning is also a labelled column
+  const rs = row.system.inference_settings && row.system.inference_settings.reasoning_setting;
+  if (rs && rs.verification_status) tag.title = `reasoning ${rs.policy}; ${rs.verification_status.replace(/_/g, " ")}`;
   const meta = el("span", "system-meta", [
     row.system.actual_provider || row.system.expected_provider,
     row.system.exact_endpoint,
@@ -363,19 +367,16 @@ function metricCell(count, denom, rate, opts = {}) {
   return td;
 }
 
-function moneyCell(value, digits, sub) {
+// Partial cost telemetry is marked with an asterisk (explained in the column header and the
+// metric notes) instead of repeating the same sub-text on every row.
+function moneyCell(value, digits, partial = false) {
   const td = el("td", "col-cost");
-  td.append(el("span", "money", money(value, digits)));
-  if (sub) td.append(el("span", "muted-sub", sub));
-  return td;
-}
-
-function reasoningCell(row) {
-  const td = el("td");
-  const badge = el("span", "reason-badge", row.reasoning ? row.reasoning.toUpperCase() : "—");
-  const rs = row.system.inference_settings && row.system.inference_settings.reasoning_setting;
-  if (rs && rs.verification_status) badge.title = `reasoning ${rs.policy}; ${rs.verification_status.replace(/_/g, " ")}`;
-  td.append(badge);
+  const amount = el("span", "money", money(value, digits));
+  if (partial && value !== null && value !== undefined) {
+    amount.append(el("sup", "money-mark", "*"));
+    amount.title = "Reported subtotal: some provider failures lack cost telemetry.";
+  }
+  td.append(amount);
   return td;
 }
 
@@ -396,15 +397,12 @@ function renderRow(row) {
   const l = row.logic;
   const logicRate = metricRate(l);
   tr.append(metricCell(l ? l.count : null, l ? l.denominator : null, logicRate, { className: "optional-logic" }));
-  const generationCost = moneyCell(row.cost, 3, row.costCompleteness === "partial" ? "partial telemetry" : null);
+  const generationCost = moneyCell(row.cost, 3, row.costCompleteness === "partial");
   generationCost.classList.add("priority-cost");
   tr.append(generationCost);
-  const costPerPass = moneyCell(row.costPerPass, 4, "generation only");
+  const costPerPass = moneyCell(row.costPerPass, 4);
   costPerPass.classList.add("optional-cost-pass");
   tr.append(costPerPass);
-  const reasoning = reasoningCell(row);
-  reasoning.classList.add("optional-reason");
-  tr.append(reasoning);
 
   const actionTd = el("td", "col-action");
   const btn = el("button", "details-btn", "Details");
@@ -456,6 +454,13 @@ function renderRunMetadata() {
   const dates = [...new Set(state.rows.map((r) => r.evaluatedAt).filter(Boolean))].sort();
   const lastRunDate = dates.length ? dates[dates.length - 1] : "Not reported";
   els.runDateChip.textContent = `Last run date: ${lastRunDate}`;
+  if (els.heroStats && state.rows.length) {
+    els.heroStats.replaceChildren(
+      el("strong", null, String(state.rows.length)), " System configurations · ",
+      el("strong", null, String(state.rows[0].denominator)), " cases each · last run ",
+      el("strong", null, lastRunDate),
+    );
+  }
 }
 
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -589,6 +594,15 @@ const TOKEN_SCATTER = {
   tipRow: (p) => `Output tokens ${intOr(p.outputTokens)}${p.outputTokensPartial ? " (reported subtotal)" : ""}`,
 };
 
+// Narrow screens get a taller, narrower viewBox so ticks and labels stay legible. Measured on
+// the shared panel, not the target, because the inactive tab's card is hidden (width 0).
+const COMPACT_CHART_WIDTH = 560;
+function compactCharts() {
+  const panel = els.chart && els.chart.closest(".cost-panel");
+  const width = panel ? panel.clientWidth : 0;
+  return width > 0 && width < COMPACT_CHART_WIDTH;
+}
+
 function renderChart(target, rows, cfg = COST_SCATTER) {
   const pts = rows.filter((r) => cfg.hasValue(r) && r.validationRate !== null);
   target.replaceChildren();
@@ -596,8 +610,9 @@ function renderChart(target, rows, cfg = COST_SCATTER) {
     target.append(el("p", "chart-hint", cfg.emptyMsg));
     return;
   }
-  const W = 960, H = 420;
-  const m = { top: 22, right: 28, bottom: 56, left: 62 };
+  const compact = compactCharts();
+  const W = compact ? 560 : 960, H = compact ? 480 : 420;
+  const m = compact ? { top: 22, right: 20, bottom: 56, left: 58 } : { top: 22, right: 28, bottom: 56, left: 62 };
   const pw = W - m.left - m.right, ph = H - m.top - m.bottom;
   // X axis: log10 scale. The metric spans ~2 orders of magnitude, so a linear axis crushes
   // the small values together and stretches the large ones. The domain snaps to 1-2-5 tick
@@ -669,6 +684,7 @@ function renderChart(target, rows, cfg = COST_SCATTER) {
   // every point. Non-frontier points stay named via chip/hover.
   const labelAll = pts.length <= 10;
   const plotPoints = pts.map((p) => ({ p, cx: x(cfg.valueOf(p)), cy: y(p.validationRate), color: colorForMode(p.reasoning) }));
+  const focusLabels = [];
   // Each system's CI band + dot live in one <g> so hovering (here or in the list)
   // can dim the other systems and isolate it. Points are registered in costFocus.
   plotPoints.forEach(({ p, cx, cy, color }) => {
@@ -685,7 +701,16 @@ function renderChart(target, rows, cfg = COST_SCATTER) {
     const dot = svg("circle", { cx, cy, r: 7, fill: color, stroke: "var(--surface)", "stroke-width": 2 });
     g.append(dot);
     root.append(g);
-    costFocus.points.push({ systemId: p.systemId, g, dot, ci });
+    // Hidden name label, shown while this System is focused from a chip, a bar, or the point
+    // itself, so the reader sees exactly where an unlabelled System sits.
+    const anchorEnd = cx > W / 2;
+    const label = svg("text", {
+      x: cx + (anchorEnd ? -14 : 14), y: cy - 14, class: "focus-label",
+      "font-size": 12.5, "font-weight": 700, "text-anchor": anchorEnd ? "end" : "start",
+      fill: "var(--ink)", stroke: "var(--surface)", "stroke-width": 4, "paint-order": "stroke", style: "display:none",
+    }, `${shortName(p.displayName)} · ${(p.reasoning || "").toUpperCase()} · ${pct(p.validationRate, 0)}`);
+    focusLabels.push(label);
+    costFocus.points.push({ systemId: p.systemId, g, dot, ci, label });
   });
 
   // Interactive hover tooltip: model, pass rate, CI, and this scatter's metric.
@@ -728,6 +753,7 @@ function renderChart(target, rows, cfg = COST_SCATTER) {
       x: labelX, y: labelY, fill: "var(--ink-soft)", "font-size": 11, "text-anchor": anchor,
     }, label));
   });
+  focusLabels.forEach((t) => root.append(t)); // above every point and static label
   hitCircles.forEach((h) => root.append(h)); // on top, so hover always registers
   target.append(root);
   target.append(tip);
@@ -1079,6 +1105,25 @@ async function init() {
   renderRunMetadata();
   renderTable();
   renderCostViews();
+  let compact = compactCharts();
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (compactCharts() === compact) return;
+      compact = compactCharts();
+      renderCostViews();
+    }, 150);
+  });
 }
+
+// The version chip links to #changelog; open that disclosure when it is the target.
+function openChangelogIfTargeted() {
+  if (location.hash === "#changelog" && els.changelog) els.changelog.open = true;
+}
+window.addEventListener("hashchange", openChangelogIfTargeted);
+// hashchange does not fire when the hash is already #changelog (e.g. after closing it).
+document.querySelectorAll(".edition-link").forEach((a) => a.addEventListener("click", () => { if (els.changelog) els.changelog.open = true; }));
+openChangelogIfTargeted();
 
 init();

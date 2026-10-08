@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>CERT-C Repair Leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20261008-v041">
-  <script src="app.js?v=20261008-v041" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261008-v042">
+  <script src="app.js?v=20261008-v042" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -31,10 +31,11 @@
       <nav aria-label="Primary">
         <a href="#overview">Results</a>
         <a href="#cost">Cost &amp; tokens</a>
-        <a href="#leaderboard">Leaderboard</a>
+        <a href="#leaderboard">Table</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.4.1</span>
+      <a class="cta-nav" href="https://marketplace.visualstudio.com/items?itemName=safe-c-ai.c-repair" rel="noreferrer noopener" target="_blank">VS Code extension</a>
+      <a class="edition-chip edition-link" href="#changelog" title="Open the changelog">v0.4.2</a>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -43,12 +44,17 @@
     <section class="hero shell" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow">CERT-C automated repair</p>
-        <h1 id="hero-title">How well do LLMs repair CERT-C violations — <em>and at what cost</em>?</h1>
+        <h1 id="hero-title">How well do LLMs repair CERT‑C violations — <em>and at what cost</em>?</h1>
         <p class="lede">
           Every system repairs the same 115 violation cases — one for each
           <strong>CERT-C Rule</strong> — under identical conditions; repair quality and
           generation cost are measured together.
         </p>
+        <p class="hero-actions">
+          <a class="btn btn-primary" href="https://marketplace.visualstudio.com/items?itemName=safe-c-ai.c-repair" rel="noreferrer noopener" target="_blank">Get the VS Code extension<span class="btn-sub">safe-c-ai.c-repair · free</span></a>
+          <a class="btn btn-ghost" href="https://github.com/safe-c-ai/certfix" rel="noreferrer noopener" target="_blank">CertFix on GitHub</a>
+        </p>
+        <p class="hero-stats" id="hero-stats" aria-live="polite"></p>
       </div>
       <aside class="hero-note" aria-label="How to read this leaderboard">
         <p class="hero-note-label">How to read this</p>
@@ -74,7 +80,7 @@
       <article class="cost-panel">
         <div class="chart-card">
           <div id="rank-chart" class="chart" role="img" aria-label="Bar chart of validation-passed rate for every system, in rank order. Each bar is labelled with its system name and reasoning mode and colored by mode group (OFF, HIGH, or Other). Hover a bar for its 95% CI and cost."></div>
-          <p class="chart-hint">Each bar shows a system's validation-passed rate, colored by reasoning mode (see legend). Hover a bar for its 95% CI and generation cost.</p>
+          <p class="chart-hint">Each bar shows a system's validation-passed rate, colored by reasoning mode (see legend). Hover a bar for its 95% CI and generation cost; the same system is highlighted in the charts below.</p>
         </div>
       </article>
     </section>
@@ -107,7 +113,7 @@
       <div class="section-heading">
         <div>
           <p class="eyebrow">Full results</p>
-          <h2 id="board-title">System configurations (ranked)</h2>
+          <h2 id="board-title">All System configurations</h2>
         </div>
         <p class="result-summary" id="result-summary" aria-live="polite">Loading measured results…</p>
       </div>
@@ -128,7 +134,7 @@
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.4.1 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.4.2 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -147,12 +153,11 @@
                 <button class="sort-btn" data-sort="logic" aria-label="Sort by suspicious logic deletion, lower is better">Susp. logic deletion <span class="sort-ind" aria-hidden="true"></span></button>
               </th>
               <th scope="col" class="col-cost priority-cost">
-                <button class="sort-btn" data-sort="cost" aria-label="Sort by generation cost">Gen. cost <span class="sort-ind" aria-hidden="true"></span></button>
+                <button class="sort-btn" data-sort="cost" aria-label="Sort by generation cost">Gen. cost <span class="sort-ind" aria-hidden="true"></span></button><span class="th-note">* reported subtotal</span>
               </th>
               <th scope="col" class="col-cost optional-cost-pass">
-                <button class="sort-btn" data-sort="costPerPass" aria-label="Sort by cost per validation-passed fix">Cost / passed <span class="sort-ind" aria-hidden="true"></span></button>
+                <button class="sort-btn" data-sort="costPerPass" aria-label="Sort by cost per validation-passed fix">Cost / passed fix <span class="sort-ind" aria-hidden="true"></span></button>
               </th>
-              <th scope="col" class="col-reason optional-reason">Reasoning</th>
               <th scope="col" class="col-action"><span class="sr-only">Details</span></th>
             </tr>
           </thead>
@@ -166,7 +171,7 @@
         <p><strong>Validation-passed</strong> denominator is all 115 cases.</p>
         <p><strong>Compile</strong> is a programmatic gate; passing it reduces risk but does not prove semantic correctness.</p>
         <p><strong>Suspicious logic deletion</strong> counts fixes the Judge flagged as likely deleting important, violation-unrelated logic; lower is better. The denominator is Judge-evaluated candidates. It is shown without a risk color because no calibrated display threshold has been adopted.</p>
-        <p><strong>Cost</strong> is measured generation cost for this run only; it excludes Judge and operator cost. Counts and denominators are always shown.</p>
+        <p><strong>Cost</strong> is measured generation cost for this run only; it excludes Judge and operator cost. An asterisk (*) marks a reported subtotal where some provider failures lack cost telemetry. Counts and denominators are always shown.</p>
       </div>
     </section>
 
@@ -211,10 +216,20 @@
           <summary><span role="heading" aria-level="3">How should the scores be read?</span></summary>
           <p>Validation-passed is a workflow count, not a correctness, safety, merge, or adoption guarantee; real use still needs human review and existing tests or static analysis. With n = 115, rates carry 95% confidence intervals of roughly ±6–9 points, so many adjacent rankings are statistically indistinguishable — Rank is descriptive. Cost covers generation for this run only, excluding Judge and operator cost, and for some rows it is a reported subtotal (a lower bound) where provider failures lack cost telemetry (shown as "reported subtotal" in the tooltip). If a system had no API generation cost, its cost would be shown as "n/a" (not zero) and it would be omitted from the cost-versus-score scatter while still appearing in the main-score chart and the ranking table.</p>
         </details>
-        <details class="method-card">
+        <details class="method-card" id="changelog">
           <summary><span role="heading" aria-level="3">Changelog</span></summary>
           <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
           <ul class="changelog-list">
+            <li>
+              <strong>v0.4.2</strong> <span class="changelog-date">2026-10-08</span>
+              <ul class="changelog-detail">
+                <li>Presentation only: scores, ranks, the 115-case pack, measurement policy, and Judge epoch are unchanged from v0.4.1.</li>
+                <li>Added links to the CertFix VS Code extension (Marketplace) and the CertFix GitHub repository in the header, hero, and footer.</li>
+                <li>Hovering a key chip or a bar now labels the matching point in the scatter plots.</li>
+                <li>Table: removed the duplicate Reasoning column (the badge beside each name shows it); partial cost telemetry is now an asterisk on the amount instead of repeated text.</li>
+                <li>Minor: the heading no longer breaks inside "CERT-C", the version chip links to this changelog, and the nav item is renamed to "Table".</li>
+              </ul>
+            </li>
             <li>
               <strong>v0.4.1</strong> <span class="changelog-date">2026-10-08</span>
               <ul class="changelog-detail">
@@ -304,8 +319,8 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.4.1 · measured aggregate</p>
-      <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.4.2 · measured aggregate</p>
+      <p class="footer-links">Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix on GitHub</a> · Use it in your editor: <a href="https://marketplace.visualstudio.com/items?itemName=safe-c-ai.c-repair" rel="noreferrer">VS Code extension (Marketplace)</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>
     </div>
