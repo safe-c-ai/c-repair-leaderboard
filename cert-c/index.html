@@ -16,8 +16,8 @@
   <meta name="twitter:description" content="How well do LLMs repair CERT-C violations, and at what cost?">
   <meta name="twitter:image" content="https://safe-c-ai.github.io/c-repair-leaderboard/cert-c/og-image.png">
   <title>CERT-C Repair Leaderboard</title>
-  <link rel="stylesheet" href="styles.css?v=20260924-v04">
-  <script src="app.js?v=20260924-v04" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261008-v041">
+  <script src="app.js?v=20261008-v041" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#leaderboard">Skip to leaderboard</a>
@@ -34,7 +34,7 @@
         <a href="#leaderboard">Leaderboard</a>
         <a href="#methodology">FAQ</a>
       </nav>
-      <span class="edition-chip" title="Leaderboard version">v0.4</span>
+      <span class="edition-chip" title="Leaderboard version">v0.4.1</span>
       <span class="edition-chip run-date-chip" id="run-date-chip">Last run date: —</span>
     </div>
   </header>
@@ -128,7 +128,7 @@
 
       <div class="table-wrap" role="region" aria-labelledby="board-title" tabindex="0">
         <table id="board-table">
-          <caption class="sr-only">v0.4 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
+          <caption class="sr-only">v0.4.1 CERT-C repair leaderboard. Ranks are tie-aware and stay fixed when re-sorting.</caption>
           <thead>
             <tr>
               <th scope="col" class="col-rank">
@@ -216,6 +216,14 @@
           <p>Scores are comparable within one board version (shown in the header), not across versions: a version bump can change the measurement policy or the set of Systems. Newest first.</p>
           <ul class="changelog-list">
             <li>
+              <strong>v0.4.1</strong> <span class="changelog-date">2026-10-08</span>
+              <ul class="changelog-detail">
+                <li>Added Claude Haiku 5.5 (OpenRouter · Google Vertex Global) at Reasoning OFF (78/115) and HIGH (103/115, tied rank 2), growing from 32 to 34 Systems. Both rows completed all 115 cases without retries.</li>
+                <li>The majority vote on byte-identical fixes was recomputed across all 34 Systems. A Haiku 5.5 OFF fix for FIO40-C matched a group that had been tied, so that group now resolves to not passed: GPT-6 Luna OFF 85 → 84, DeepSeek V4.1 Flash OFF 74 → 73, MiMo-V2.6-Flash OFF 69 → 68. Haiku 5.5 OFF itself is 78 after vote (79 before). No other existing row's score changed; some ranks shift because rows were added.</li>
+                <li>The 115-case pack, measurement policy, and Judge epoch are unchanged from v0.4.</li>
+              </ul>
+            </li>
+            <li>
               <strong>v0.4</strong> <span class="changelog-date">2026-09-25</span>
               <ul class="changelog-detail">
                 <li>Scoring change: when two or more Systems produced a byte-identical fix for the same case, the Judge sometimes gave them different verdicts. Those verdicts are now unified by majority vote (pass vs. not pass) across all 32 listed Systems; tied groups keep their original verdicts. Of 23 disagreeing groups, 17 were unified (39 verdicts changed: 25 to pass, 14 from pass) and 6 ties were left as judged. No case was re-judged or re-generated.</li>
@@ -296,7 +304,7 @@
 
   <footer class="site-footer">
     <div class="shell footer-inner">
-      <p><span id="footer-site-name">Repair leaderboard</span> · v0.4 · measured aggregate</p>
+      <p><span id="footer-site-name">Repair leaderboard</span> · v0.4.1 · measured aggregate</p>
       <p>Harness: <a href="https://github.com/safe-c-ai/certfix" rel="noreferrer">CertFix</a></p>
       <p>Sanitized public data · no private case, source, Gold, or raw response content</p>
       <p>Model and company names are trademarks of their respective owners. This leaderboard is independent and is not endorsed by or affiliated with any listed provider.</p>
